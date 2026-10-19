@@ -1,0 +1,210 @@
+/* ------------------------------------------------------------------
+   Photo strip. Warm monochrome: a soft cream page so the photos are
+   the only color, Karla in warm grays (after hazeleckert.ca).
+------------------------------------------------------------------- */
+:root {
+  --bg: #f6f2ea;         /* soft cream behind the photos */
+  --placeholder: #ebe5d9; /* shown while a photo loads */
+  --ink: #2b2a27;
+  --ink-2: #6f6a61;       /* 5:1 on --bg, fine for small text */
+  --line: #d9d2c4;
+
+  --bar: 72px;
+  --pad: clamp(16px, 3vw, 48px);
+  /* Height the photos can use: the viewport minus the bar and padding. */
+  --stage: calc(100dvh - var(--bar) - var(--pad) * 2);
+  --ease-out: cubic-bezier(.215, .61, .355, 1);
+  color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; overflow: hidden; background: var(--bg); color: var(--ink);
+  font: 14px/1.5 "Karla", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%;
+}
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
+
+/* ---------------- Top bar ---------------- */
+.bar {
+  position: fixed; inset: 0 0 auto; height: var(--bar); z-index: 2;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 var(--pad);
+}
+.bar .name { font-weight: 500; letter-spacing: .04em; text-transform: uppercase; }
+.bar nav a { color: var(--ink-2); transition: color .2s; }
+.bar nav a:hover, .bar nav a[aria-current="page"] { color: var(--ink); }
+
+/* ---------------- Sideways strip ---------------- */
+.strip {
+  position: fixed; inset: var(--bar) 0 0; padding: var(--pad);
+  display: flex; align-items: flex-start;
+  overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain;
+  scrollbar-width: thin; scrollbar-color: var(--line) transparent;
+}
+.strip:focus-visible { outline: none; }
+/* Flex rows drop their right padding when they overflow; this keeps the end margin. */
+.strip::after { content: ""; flex: none; width: var(--pad); }
+
+/* Each frame gets --size, --offset (fractions of --stage) and --gap from strip.js. */
+.frame {
+  flex: none; position: relative; overflow: hidden; margin: 0;
+  height: calc(var(--size, .8) * var(--stage));
+  margin-top: calc(var(--offset, 0) * var(--stage));
+  margin-left: calc(var(--gap, 1) * var(--pad));
+}
+.frame:first-child { margin-left: 0; }
+.frame button { all: unset; display: block; height: 100%; cursor: zoom-in; }
+.frame button:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
+.frame img {
+  display: block; height: 100%; width: auto; background: var(--placeholder);
+  opacity: 0; transition: opacity .9s ease;
+}
+.frame img.loaded { opacity: 1; }
+
+/* Label slides up over the photo on hover (after alexandracarnold.com). */
+.frame figcaption {
+  position: absolute; inset: auto 0 0; padding: 32px 12px 10px; pointer-events: none;
+  color: #fff; font-size: 13px; line-height: 1.4;
+  background: linear-gradient(transparent, rgba(0, 0, 0, .42));
+  transform: translateY(100%); transition: transform .38s var(--ease-out);
+}
+.frame figcaption span { display: block; }
+.frame figcaption span + span { opacity: .8; }
+.frame:hover figcaption, .frame:focus-within figcaption { transform: none; }
+@media (hover: none) { .frame figcaption { display: none; } } /* touch: labels live in the viewer */
+
+/* ---------------- Gallery: contact sheet ----------------
+   Every photo printed on one contact sheet: rows of dark film strips with
+   sprocket holes and frame numbers, sitting on the cream "paper". */
+.gallery {
+  position: fixed; inset: var(--bar) 0 0; overflow-y: auto; overscroll-behavior-y: contain;
+  padding: calc(var(--pad) * .5) var(--pad) calc(var(--pad) * 2);
+  scrollbar-width: thin; scrollbar-color: var(--line) transparent;
+}
+.gallery:focus-visible { outline: none; }
+.roll { max-width: 1280px; margin: calc(var(--pad) * .5) auto 0; }
+.sheet { display: flex; flex-direction: column; gap: 14px; --film: #1a1917; }
+/* Each strip is laid down by hand: gallery.js gives it a slight random tilt
+   and sideways shift. --cols is set from the window width (6 / 4 / 3). */
+.filmstrip {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(var(--cols, 6), 1fr);
+  transform: translateX(var(--shift, 0px)) rotate(var(--tilt, 0deg));
+}
+.cell { position: relative; background: var(--film); padding: 20px 4px 24px; }
+/* Sprocket holes along the top and bottom of each strip. */
+.cell::before, .cell::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 6px;
+  background: repeating-linear-gradient(90deg, transparent 0 5px, #4a463f 5px 11px, transparent 11px 16px);
+  opacity: .7;
+}
+.cell::before { top: 7px; }
+.cell::after { bottom: 7px; }
+.neg {
+  all: unset; box-sizing: border-box; display: grid; place-items: center; width: 100%;
+  aspect-ratio: 3 / 2; background: #0e0d0c; cursor: zoom-in;
+}
+.neg img { display: block; max-width: 100%; max-height: 100%; transition: filter .25s; }
+/* A vertical photo turned a quarter-turn to lie along the strip. Before the
+   turn it is sized to the frame's height by its width (container units), so
+   after rotating it fills the 3:2 frame like a horizontal one. */
+.neg.portrait { position: relative; overflow: hidden; container-type: size; }
+.neg.portrait img {
+  position: absolute; left: 50%; top: 50%; max-width: none; max-height: none;
+  width: 100cqh; height: 100cqw; object-fit: contain;
+  transform: translate(-50%, -50%) rotate(-90deg);
+}
+.neg:hover img { filter: brightness(1.12); }
+.neg:focus-visible { outline: 1px solid var(--bg); outline-offset: 2px; }
+.num {
+  position: absolute; left: 8px; bottom: 0; line-height: 24px;
+  font: 10px/24px ui-monospace, "SF Mono", Menlo, monospace; color: #9b9282; letter-spacing: .06em;
+}
+
+/* Toolbar: a small pill at the bottom that grows on hover (or tap) into the
+   order and film-stock filters. */
+.filter {
+  /* Centered with auto margins rather than left: 50%, which would cap its
+     shrink-to-fit width at half the screen. */
+  position: fixed; left: 0; right: 0; bottom: 18px; z-index: 2; margin-inline: auto;
+  width: fit-content; max-width: min(560px, calc(100vw - 32px)); padding: 6px 14px;
+  background: rgba(251, 248, 242, .94); border: 1px solid var(--line); border-radius: 18px;
+  box-shadow: 0 1px 3px rgba(43, 42, 39, .08), 0 8px 24px rgba(43, 42, 39, .1);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  font-size: 12px; color: var(--ink-2);
+  transition: padding .3s var(--ease-out), font-size .3s var(--ease-out), box-shadow .3s;
+}
+.filter-current { all: unset; display: block; margin: 0 auto; cursor: pointer; white-space: nowrap; text-align: center; }
+.filter-current:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
+/* Collapsed, the options take no room in either direction, so the pill is just
+   its label; opening animates both to full size. */
+.filter-options {
+  display: grid; grid-template-rows: 0fr; grid-template-columns: 0fr;
+  transition: grid-template-rows .32s var(--ease-out), grid-template-columns .32s var(--ease-out);
+}
+.filter-inner { min-height: 0; min-width: 0; overflow: hidden; }
+.filter-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; padding-top: 10px; }
+.filter-group + .filter-group { margin-top: 10px; border-top: 1px solid var(--line); }
+.filter-group button { all: unset; cursor: pointer; white-space: nowrap; color: var(--ink-2); transition: color .2s; }
+.filter-group button:hover { color: var(--ink); }
+.filter-group button[aria-pressed="true"] { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+.filter-group button:focus-visible { outline: 1px solid var(--ink); outline-offset: 3px; }
+.filter:hover, .filter:focus-within, .filter.open {
+  padding: 12px 20px 14px; font-size: 13px;
+  box-shadow: 0 2px 6px rgba(43, 42, 39, .1), 0 16px 40px rgba(43, 42, 39, .16);
+}
+.filter:hover .filter-options, .filter:focus-within .filter-options, .filter.open .filter-options { grid-template-rows: 1fr; grid-template-columns: 1fr; }
+.filter:hover .filter-current, .filter:focus-within .filter-current, .filter.open .filter-current { color: var(--ink); }
+.gallery { padding-bottom: 96px; } /* room to scroll the last strip above the toolbar */
+
+/* Hover preview, printed on a little cream mat. */
+.loupe {
+  position: fixed; top: 0; left: 0; z-index: 3; pointer-events: none;
+  padding: 10px 10px 8px; background: #fbf8f2;
+  box-shadow: 0 2px 6px rgba(43, 42, 39, .12), 0 18px 48px rgba(43, 42, 39, .22);
+  opacity: 0; transition: opacity .18s ease;
+}
+.loupe.on { opacity: 1; }
+.loupe img { display: block; object-fit: contain; background: var(--placeholder); }
+.loupe-label { padding-top: 7px; font-size: 12px; color: var(--ink-2); }
+@media (hover: none) { .loupe { display: none; } }
+
+/* ---------------- Full-screen viewer ---------------- */
+dialog { border: 0; padding: 0; color: inherit; }
+.viewer {
+  width: 100%; height: 100%; max-width: none; max-height: none; margin: 0;
+  background: var(--bg); display: grid; grid-template-rows: 1fr auto;
+}
+.viewer:not([open]) { display: none; }
+.viewer[open] { animation: fade .35s ease; }
+.viewer::backdrop { background: var(--bg); }
+@keyframes fade { from { opacity: 0; } }
+.viewer .stage { display: grid; place-items: center; min-height: 0; padding: 64px var(--pad) 0; }
+.viewer .stage img {
+  max-width: 100%; max-height: calc(100dvh - 170px); width: auto; height: auto;
+  transition: opacity .3s ease;
+}
+.viewer .stage img.loading { opacity: 0; }
+.viewer footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px var(--pad) 28px; }
+.viewer .caption { flex: 1; min-width: 0; text-align: center; }
+.viewer .caption div + div { color: var(--ink-2); }
+.v-btn { all: unset; cursor: pointer; color: var(--ink-2); transition: color .2s; }
+.v-btn:hover { color: var(--ink); }
+.v-btn:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
+.v-close { position: absolute; top: 24px; right: var(--pad); }
+
+/* ---------------- Small screens ---------------- */
+@media (max-width: 640px) {
+  :root { --bar: 60px; }
+  /* Same height for every photo, but a wide one never gets wider than the screen. */
+  .frame {
+    height: min(calc(var(--stage) * .7), calc((100vw - var(--pad) * 3) / var(--ar)));
+    margin-top: calc(var(--stage) * .12); margin-left: var(--pad);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+}

@@ -1,0 +1,61 @@
+# Pages CMS config (https://pagescms.org). Lets you upload and label film
+# photos from the browser; every save is a commit to this repo.
+#
+# Uploads land in images/film/. Name them <stock>_<NN>.jpg (e.g. portra400_37.jpg)
+# so the film stock fills itself in. The "Regenerate photos.json" GitHub Action
+# then shrinks each new file, makes its gallery thumbnail and adds an entry for
+# it, after which its labels show up below.
+
+media:
+  input: images/film
+  # Written into content as-is. Relative (no leading slash) so paths keep
+  # working when the site is served from a subpath like user.github.io/portfolio.
+  output: images/film
+  extensions: [jpg, jpeg, png, webp, avif]
+
+content:
+  - name: photos
+    label: Film photos
+    type: file
+    path: content/photos.json
+    format: json
+    list: true
+    fields:
+      - name: src
+        label: Photo
+        type: image
+        readonly: true
+        description: Set by the photos Action from the uploaded file. Upload new photos in Media.
+      - name: location
+        label: Location
+        type: string
+      - name: date
+        label: Date
+        type: string
+        description: Year and month, e.g. 2025-06.
+        pattern:
+          regex: "^\\d{4}-(0[1-9]|1[0-2])$"
+          message: Use YYYY-MM, e.g. 2025-06
+      - name: camera
+        label: Camera
+        type: string
+      - name: stock
+        label: Film stock
+        type: string
+      - name: alt
+        label: Alt text
+        type: text
+        description: Optional. Describes the photo for screen readers.
+      - name: thumb
+        label: Thumbnail
+        type: string
+        readonly: true
+        description: Small copy for the gallery, made by the photos Action.
+      - name: width
+        label: Width (px)
+        type: number
+        readonly: true
+      - name: height
+        label: Height (px)
+        type: number
+        readonly: true

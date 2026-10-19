@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Gallery · Abhinay Pattipati</title>
+  <meta name="description" content="Contact sheets of film photographs by Abhinay Pattipati.">
+  <meta name="theme-color" content="#f6f2ea">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/photo.css">
+</head>
+<body class="gallery-page">
+  <header class="bar">
+    <a class="name" href="./">Abhinay Pattipati</a>
+    <nav aria-label="Main"><a href="gallery.html" aria-current="page">Gallery</a></nav>
+  </header>
+
+  <main class="gallery" id="gallery" tabindex="-1" aria-label="Contact sheet of every photograph"></main>
+
+  <!-- Small pill that grows on hover (or tap) into order and film-stock filters. -->
+  <div class="filter" id="filter" role="toolbar" aria-label="Order and filter by film stock">
+    <button type="button" class="filter-current" id="filter-current" aria-expanded="false" aria-controls="filter-options">All · mixed</button>
+    <div class="filter-options" id="filter-options"><div class="filter-inner" id="filter-inner"></div></div>
+  </div>
+
+  <!-- Bigger preview that follows the pointer while you hover a frame. -->
+  <div class="loupe" id="loupe" aria-hidden="true"><img alt=""><div class="loupe-label"></div></div>
+
+  <dialog class="viewer" id="viewer" aria-label="Photo viewer">
+    <button class="v-btn v-close" id="v-close">Close</button>
+    <div class="stage"><img id="v-img" alt=""></div>
+    <footer>
+      <button class="v-btn" id="v-prev" aria-label="Previous photo">Prev</button>
+      <div class="caption"><div id="v-line1"></div><div id="v-line2"></div></div>
+      <button class="v-btn" id="v-next" aria-label="Next photo">Next</button>
+    </footer>
+  </dialog>
+
+  <script src="js/gallery.js" type="module"></script>
+</body>
+</html>

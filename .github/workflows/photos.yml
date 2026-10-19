@@ -1,0 +1,54 @@
+# Runs whenever photos are added, replaced or removed in images/film/ (from
+# Pages CMS or a normal git push). `npm run photos` shrinks new uploads to
+# 2000px, strips their EXIF, makes gallery thumbnails in images/film/thumbs/,
+# and regenerates content/photos.json; the results are committed back.
+#
+# It can't loop: pushes made with GITHUB_TOKEN never start new workflow runs.
+name: Regenerate photos.json
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "images/film/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Several uploads in a row each start a run; let them go one at a time.
+concurrency:
+  group: photos-json
+  cancel-in-progress: false
+
+jobs:
+  photos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install pillow
+
+      - run: npm run photos
+
+      - name: Commit photos and photos.json if they changed
+        run: |
+          git add -A images/film content/photos.json
+          if git diff --cached --quiet; then
+            echo "Photos already up to date"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Prepare uploaded photos and regenerate photos.json"
+          # Someone may have saved labels in the CMS while this ran.
+          git pull --rebase origin main
+          git push origin HEAD:main

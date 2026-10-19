@@ -1,0 +1,11 @@
+{
+  "name": "portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Photography portfolio.",
+  "scripts": {
+    "dev": "npx --yes serve@14.2.4 . -l 4321",
+    "photos": "python3 scripts/prepare-photos.py && node scripts/build-photos.mjs"
+  }
+}

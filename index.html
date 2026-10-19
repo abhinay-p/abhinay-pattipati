@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Abhinay Pattipati</title>
+  <meta name="description" content="Photographs by Abhinay Pattipati.">
+  <meta name="theme-color" content="#f6f2ea">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/photo.css">
+</head>
+<body>
+  <header class="bar">
+    <a class="name" href="./">Abhinay Pattipati</a>
+    <nav aria-label="Main"><a href="gallery.html">Gallery</a></nav>
+  </header>
+
+  <main class="strip" id="strip" tabindex="0" aria-label="Photographs. Scroll or use the arrow keys to move through them."></main>
+
+  <dialog class="viewer" id="viewer" aria-label="Photo viewer">
+    <button class="v-btn v-close" id="v-close">Close</button>
+    <div class="stage"><img id="v-img" alt=""></div>
+    <footer>
+      <button class="v-btn" id="v-prev" aria-label="Previous photo">Prev</button>
+      <div class="caption"><div id="v-line1"></div><div id="v-line2"></div></div>
+      <button class="v-btn" id="v-next" aria-label="Next photo">Next</button>
+    </footer>
+  </dialog>
+
+  <script src="js/strip.js" type="module"></script>
+</body>
+</html>
