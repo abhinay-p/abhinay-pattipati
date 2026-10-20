@@ -1,4 +1,4 @@
-// Full-screen photo viewer shared by the strip (index.html) and the gallery.
+// Full-screen photo viewer shared by the strip (photos.html) and the gallery.
 // Expects the #viewer dialog markup on the page. Each open photo gets a URL
 // named after its file (#portra400_12), so Back closes it and links can be
 // shared; names stay valid even though the strip's order changes every visit.

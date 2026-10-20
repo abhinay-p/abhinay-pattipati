@@ -33,6 +33,7 @@ a { color: inherit; text-decoration: none; }
   display: flex; align-items: center; justify-content: space-between; padding: 0 var(--pad);
 }
 .bar .name { font-weight: 500; letter-spacing: .04em; text-transform: uppercase; }
+.bar nav { display: flex; gap: 24px; }
 .bar nav a { color: var(--ink-2); transition: color .2s; }
 .bar nav a:hover, .bar nav a[aria-current="page"] { color: var(--ink); }
 
@@ -170,6 +171,37 @@ a { color: inherit; text-decoration: none; }
 .loupe img { display: block; object-fit: contain; background: var(--placeholder); }
 .loupe-label { padding-top: 7px; font-size: 12px; color: var(--ink-2); }
 @media (hover: none) { .loupe { display: none; } }
+
+/* ---------------- Landing page ----------------
+   A photograph blurred into soft color fills the screen, with small white
+   type over it (after hazeleckert.ca). */
+body.landing { overflow: hidden; background: #4d5a46; color: #fff; }
+.landing-bg {
+  position: fixed; inset: -8%; /* bleed past the edges so the blur has no soft border */
+  background-position: center; background-size: cover; background-repeat: no-repeat;
+  filter: blur(42px) saturate(1.15);
+  transform: scale(1.05);
+}
+/* A soft wash keeps white text readable where the photo is bright. */
+.landing-bg::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(160deg, rgba(24, 30, 22, .55), rgba(24, 30, 22, .2) 55%, rgba(24, 30, 22, .3));
+}
+/* The whole screen is one link to the photographs; only the name shows. */
+.landing-link {
+  position: fixed; inset: 0; display: block; cursor: pointer;
+  padding: clamp(40px, 9vh, 96px) clamp(24px, 7vw, 100px);
+  color: #fff; text-decoration: none; text-shadow: 0 1px 12px rgba(0, 0, 0, .18);
+}
+.landing h1 {
+  display: inline-block; margin: 0; font: 500 14px/1.4 "Karla", sans-serif;
+  letter-spacing: .04em; text-transform: uppercase;
+  text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px;
+  transition: opacity .2s;
+}
+.landing-link:hover h1 { opacity: .8; }
+.landing-link:focus-visible { outline: none; }
+.landing-link:focus-visible h1 { outline: 1px solid #fff; outline-offset: 6px; }
 
 /* ---------------- Full-screen viewer ---------------- */
 dialog { border: 0; padding: 0; color: inherit; }

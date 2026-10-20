@@ -2,7 +2,8 @@
 
 A film photography portfolio, live at https://abhinay-p.github.io/abhinay-pattipati/.
 
-- **Home** (`index.html`): a sideways-scrolling strip of photos, with film stocks freshly mixed on every visit.
+- **Landing** (`index.html`): one photograph blurred into soft color, with just the name. Clicking anywhere opens the photographs. Old photo links (`/#portra400_12`) are forwarded to `photos.html`.
+- **Photographs** (`photos.html`): a sideways-scrolling strip of photos, with film stocks freshly mixed on every visit.
 - **Gallery** (`gallery.html`): every photo on one contact sheet, cut into strips that sit slightly askew as if laid by hand (the order and placement change on every visit). Hovering a frame shows a bigger preview, and clicking opens the photo on its own. A small toolbar at the bottom grows on hover (or tap). It lets visitors order the sheet by stock or show only one film stock; nothing is grouped unless they choose it.
 
 Photos are labelled by film stock. It has no framework and no build step, so it runs on any static host.
