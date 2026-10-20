@@ -5,24 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Abhinay Pattipati</title>
   <meta name="description" content="Film photographs by Abhinay Pattipati.">
-  <meta name="theme-color" content="#4d5a46">
+  <meta name="theme-color" content="#1f2a33">
   <script>
     // Photo links from before this landing page existed (/#portra400_12)
     // now live on the Photographs page; send them there.
     if (/^#[\w.-]+$/.test(location.hash)) location.replace("photos.html" + location.hash);
   </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/photo.css">
 </head>
 <body class="landing">
-  <!-- One of the photographs, blurred into soft color (after hazeleckert.ca). -->
-  <div class="landing-bg" aria-hidden="true" style="background-image: url('images/film/thumbs/portra400_08.jpg')"></div>
+  <!-- Fallback if WebGL is unavailable: the photograph, blurred. -->
+  <div class="landing-bg" aria-hidden="true" style="background-image: url('images/film/thumbs/phoenix200_09.jpg')"></div>
+  <!-- One of the landscape photographs as a pixel-and-grain pattern that ripples under the pointer. -->
+  <canvas class="landing-canvas" id="landing-canvas" aria-hidden="true"></canvas>
 
-  <!-- The whole screen is the way in: click anywhere to see the photographs. -->
-  <a class="landing-link" href="photos.html" aria-label="Abhinay Pattipati. View photographs">
-    <h1>Abhinay Pattipati</h1>
-  </a>
+  <!-- No text: the whole screen is the way in to the photographs. -->
+  <a class="landing-link" href="photos.html" aria-label="Abhinay Pattipati. View photographs"></a>
+
+  <script src="js/landing.js" type="module"></script>
 </body>
 </html>
