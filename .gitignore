@@ -1,3 +1,6 @@
 .DS_Store
 node_modules/
 .claude/
+import-plan.json
+import-review.jpg
+__pycache__/

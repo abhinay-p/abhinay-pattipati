@@ -25,6 +25,28 @@ That shrinks anything larger than 2000px, strips EXIF data (scanner, camera, dat
 
 Once the site is on GitHub, you can skip both steps and use the browser instead (see below).
 
+## Import a new roll
+
+For a folder of raw scans straight from the lab, `scripts/import-scans.py` does the naming, duplicate check and border cropping for you, with a review step before anything is written:
+
+```bash
+python3 scripts/import-scans.py plan ~/Desktop/photos/<roll-folder> --stock portra400
+```
+
+This writes `import-plan.json` and a contact sheet, `import-review.jpg` (both git-ignored). It flags:
+
+- **Duplicates:** frames already on the site, or repeated within the roll. These are outlined in red on the sheet and set to `"skip": true`.
+- **White scanner borders:** the proposed crop is drawn as a red line. Only a white band that starts at the edge and ends sharply counts. Bright sky or a white wall that runs further into the frame is left alone.
+
+Look over the sheet. In `import-plan.json`, set `"apply_crop": false` for any crop that cuts into the photo, and `"skip": false` for a flagged frame you want anyway. Then:
+
+```bash
+python3 scripts/import-scans.py apply import-plan.json
+npm run photos
+```
+
+`apply` writes `images/film/<stock>_<NN>.jpg`, numbered after that stock's existing photos in frame order, at 2000px with EXIF removed. It never overwrites an existing file. Check new frames for your face before pushing.
+
 ## Edit photos on the live site
 
 Go to **https://abhinay-p.github.io/abhinay-pattipati/admin/**. That page isn't linked anywhere on the site and is hidden from search engines. It sends you to [Pages CMS](https://pagescms.org), which signs you in with GitHub. The real lock is that GitHub sign-in: only accounts with write access to this repo can change anything. Every save is a commit, and GitHub Pages redeploys within a minute or two.
