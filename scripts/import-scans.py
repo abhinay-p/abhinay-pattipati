@@ -4,8 +4,9 @@
      python3 scripts/import-scans.py plan <scan-folder> --stock portra400
    - Finds duplicate frames, both within the folder and against photos already
      on the site, using a perceptual "difference hash".
-   - Proposes crops for white scanner borders using per-row/column brightness
-     profiles.
+   - Proposes crops for white scanner borders and black frame edges (the gap
+     between frames, once a negative is inverted) using per-row/column
+     brightness profiles.
    - Writes import-plan.json and a review sheet (import-review.jpg) with each
      proposed crop drawn as a red line and each duplicate labelled.
 
@@ -47,7 +48,14 @@ BAND = 0.45          # a line is part of the border band if this share of it is 
 TAIL = 0.06          # keep trimming a ragged edge while the white share stays above this
 MAX_REBATE = 0.08    # a dark film edge this wide may sit outside the white band
 MAX_CUT = 0.18       # the band must end within this share of the side, or it's sky/wall
+SOLID = 0.85         # a border has at least one line this white; a wall or sky is patchier
 MARGIN = 0.003       # trim a hair past the band so no white sliver remains
+
+# Black frame edges (the unexposed gap between frames comes out black once inverted)
+DARK = 40            # a pixel counts as black if every channel is below this
+DARK_BAND = 0.85     # a line is part of the black edge if this share of it is black
+DARK_DROP = 0.2      # just past the band the black share must fall by this much, or it's a night scene
+MAX_DARK_CUT = 0.05  # the black edge must end within this share of the side
 
 
 # ---------------------------------------------------------------- helpers
@@ -103,6 +111,12 @@ def white_mask(im):
     return ImageChops.darker(bright, neutral)
 
 
+def dark_mask(im):
+    """255 where every channel of a pixel is below DARK, else 0."""
+    r, g, b = im.split()
+    return ImageChops.lighter(ImageChops.lighter(r, g), b).point(lambda v: 255 if v < DARK else 0)
+
+
 def profile(mask, side):
     """Share of white pixels in each column (left/right) or row (top/bottom),
     ordered from that edge inward."""
@@ -116,8 +130,9 @@ def border_cut(p):
     """How much of a side to trim (0..MAX_CUT as a share), or 0 if there's no border.
 
     A border is a band of white lines that starts at the edge (optionally past a
-    thin dark film edge) and then ends sharply. A bright area that runs on past
-    MAX_CUT (sky, a white wall) is part of the photo and is left alone."""
+    thin dark film edge), is nearly solid white somewhere, and then ends sharply.
+    A bright area that is patchy or runs on past MAX_CUT (sky, a white wall) is
+    part of the photo and is left alone."""
     n = len(p)
     i = 0
     while i < n * MAX_REBATE and p[i] < BAND:
@@ -131,16 +146,47 @@ def border_cut(p):
         j += 1
     if j >= n * MAX_CUT:
         return 0.0                     # runs on too far: sky or a wall, not a border
-    while j < n * MAX_CUT and p[j] > TAIL:
-        j += 1                         # ragged edge
+    if max(p[i:j]) < SOLID:
+        return 0.0                     # never solid white: a wall or sky at the edge
+    stop = min(n * MAX_CUT, j + (j - i) + 2)
+    while j < stop and p[j] > TAIL:
+        j += 1                         # ragged edge of a tilted border, at most as wide again
     if j >= n * MAX_CUT:
         return 0.0
     return round((j + n * MARGIN) / n, 4)
 
 
+def dark_cut(p):
+    """How much of a side to trim for a black frame edge (a share), or 0.
+
+    The band is nearly solid black from the edge and ends sharply. A night scene
+    is dark at the edge too, but it stays dark further in or fades out slowly."""
+    n = len(p)
+    i = 0
+    while i < n * 0.005 and p[i] < DARK_BAND:
+        i += 1                         # a hairline of scanner light at the very edge
+    j = i
+    while j < n * MAX_DARK_CUT and p[j] >= DARK_BAND:
+        j += 1
+    if j - i < 2 or j >= n * MAX_DARK_CUT:
+        return 0.0
+    after = p[j:j + max(3, round(n * 0.01))]
+    if sum(p[i:j]) / (j - i) - sum(after) / len(after) < DARK_DROP:
+        return 0.0
+    return round((j + n * MARGIN) / n, 4)
+
+
 def find_borders(im):
-    mask = white_mask(im)
-    return {side: border_cut(profile(mask, side)) for side in ("left", "top", "right", "bottom")}
+    """Share of each side to trim: a white scanner border, then any black frame
+    edge just inside it."""
+    white, dark = white_mask(im), dark_mask(im)
+    cuts = {}
+    for side in ("left", "top", "right", "bottom"):
+        w = border_cut(profile(white, side))
+        p = profile(dark, side)
+        k = round(w * len(p))
+        cuts[side] = round(w + dark_cut(p[k:]) * (len(p) - k) / len(p), 4)
+    return cuts
 
 
 def cropped(im, c):
