@@ -266,13 +266,6 @@
     "width": 2000
   },
   {
-    "src": "images/film/fuji400_12.jpg",
-    "stock": "Fuji 400",
-    "thumb": "images/film/thumbs/fuji400_12.jpg",
-    "height": 1369,
-    "width": 2000
-  },
-  {
     "src": "images/film/fuji400_13.jpg",
     "stock": "Fuji 400",
     "thumb": "images/film/thumbs/fuji400_13.jpg",
@@ -1036,13 +1029,6 @@
     "width": 2000
   },
   {
-    "src": "images/film/gold200_62.jpg",
-    "stock": "Kodak Gold 200",
-    "thumb": "images/film/thumbs/gold200_62.jpg",
-    "height": 1326,
-    "width": 2000
-  },
-  {
     "src": "images/film/gold200_63.jpg",
     "stock": "Kodak Gold 200",
     "thumb": "images/film/thumbs/gold200_63.jpg",
@@ -1372,13 +1358,6 @@
     "width": 2000
   },
   {
-    "src": "images/film/kodacolor100_01.jpg",
-    "stock": "Kodacolor 100",
-    "thumb": "images/film/thumbs/kodacolor100_01.jpg",
-    "height": 1375,
-    "width": 2000
-  },
-  {
     "src": "images/film/kodacolor100_02.jpg",
     "stock": "Kodacolor 100",
     "thumb": "images/film/thumbs/kodacolor100_02.jpg",
@@ -1575,34 +1554,6 @@
     "width": 2000
   },
   {
-    "src": "images/film/kodacolor100_30.jpg",
-    "stock": "Kodacolor 100",
-    "thumb": "images/film/thumbs/kodacolor100_30.jpg",
-    "height": 1377,
-    "width": 2000
-  },
-  {
-    "src": "images/film/kodacolor100_31.jpg",
-    "stock": "Kodacolor 100",
-    "thumb": "images/film/thumbs/kodacolor100_31.jpg",
-    "height": 1392,
-    "width": 2000
-  },
-  {
-    "src": "images/film/kodacolor100_33.jpg",
-    "stock": "Kodacolor 100",
-    "thumb": "images/film/thumbs/kodacolor100_33.jpg",
-    "height": 1370,
-    "width": 2000
-  },
-  {
-    "src": "images/film/kodacolor100_34.jpg",
-    "stock": "Kodacolor 100",
-    "thumb": "images/film/thumbs/kodacolor100_34.jpg",
-    "height": 1374,
-    "width": 2000
-  },
-  {
     "src": "images/film/kodacolor100_35.jpg",
     "stock": "Kodacolor 100",
     "thumb": "images/film/thumbs/kodacolor100_35.jpg",
@@ -1635,13 +1586,6 @@
     "stock": "Kodacolor 200",
     "thumb": "images/film/thumbs/kodacolor200_03.jpg",
     "height": 1386,
-    "width": 2000
-  },
-  {
-    "src": "images/film/kodacolor200_04.jpg",
-    "stock": "Kodacolor 200",
-    "thumb": "images/film/thumbs/kodacolor200_04.jpg",
-    "height": 1401,
     "width": 2000
   },
   {
