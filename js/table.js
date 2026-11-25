@@ -105,9 +105,10 @@ function holdable(t) {
     if (e.button) return;
     node.setPointerCapture(e.pointerId);
     for (const s of [t.springs.x, t.springs.y]) s.stop();
+    const onTop = t.z === top;
     lift(t);
     node.classList.add("held");
-    hold = { id: e.pointerId, dx: t.x - e.clientX, dy: t.y - e.clientY, fromX: e.clientX, fromY: e.clientY, moved: 0,
+    hold = { id: e.pointerId, dx: t.x - e.clientX, dy: t.y - e.clientY, fromX: e.clientX, fromY: e.clientY, moved: 0, onTop,
       tx: createTracker(e.clientX, e.timeStamp), ty: createTracker(e.clientY, e.timeStamp) };
   });
 
@@ -125,10 +126,14 @@ function holdable(t) {
 
   const release = (e) => {
     if (e.pointerId !== hold?.id) return;
-    const { moved, tx, ty } = hold;
+    const { moved, onTop, tx, ty } = hold;
     hold = null;
     node.classList.remove("held");
-    if (moved < CLICK) return;
+    if (moved < CLICK) {
+      // A finger has no double-click: tapping the photo on top opens it.
+      if (onTop && e.type === "pointerup" && e.pointerType !== "mouse") open(t);
+      return save();
+    }
     const { w, h } = room();
     const vx = reduceMotion.matches ? 0 : tx.velocity(e.timeStamp), vy = reduceMotion.matches ? 0 : ty.velocity(e.timeStamp);
     go(t, { x: inside(t.x + vx * THROW, w), y: inside(t.y + vy * THROW, h) }, { x: vx, y: vy });
@@ -136,10 +141,9 @@ function holdable(t) {
   node.addEventListener("pointerup", release);
   node.addEventListener("pointercancel", release);
 
-  // Double-click, or Enter or Space (a click without a pointer), opens it.
+  // Double-click, or Enter or Space (a click without a pointer), opens it too.
   node.addEventListener("dblclick", () => open(t));
   node.addEventListener("click", (e) => { if (e.detail === 0) open(t); });
-  node.addEventListener("focus", () => { if (node.matches(":focus-visible")) lift(t); });
   node.addEventListener("keydown", (e) => key(e, t));
 }
 
@@ -260,6 +264,7 @@ document.getElementById("copy").onclick = async () => {
 // A resized table keeps every photo in the same part of it.
 let was = null;
 addEventListener("resize", () => {
+  if (!was) return;
   const { w, h } = room();
   for (const t of prints) {
     const x = inside((heading(t, "x") / was.w) * w, w), y = inside((heading(t, "y") / was.h) * h, h);
