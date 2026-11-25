@@ -15,7 +15,6 @@
 .jump li + li { margin-top: 4px; }
 .column a:not([class]) { text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 4px; transition: text-decoration-color .2s; }
 .column a:not([class]):hover { text-decoration-color: currentColor; }
-.todo { color: var(--ink-2); font-style: italic; }
 
 .column dl { margin: 0; display: grid; grid-template-columns: 92px 1fr; gap: 12px 20px; }
 .column dt { color: var(--ink-2); font-size: 13px; line-height: 24.75px; }
