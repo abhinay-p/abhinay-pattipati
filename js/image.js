@@ -41,7 +41,7 @@ export function photoImg(p, cssWidth, attrs = {}) {
   return el("img", {
     decoding: "async", width: p.width, height: p.height, ...attrs,
     sizes: many && sizesFor(cssWidth),
-    srcset: many && copies.map((c) => `${c.url} ${c.width}w`).join(", "),
+    srcset: many && copies.map((c) => `${encodeURI(c.url)} ${c.width}w`).join(", "), // a space would end the URL early
     src: p.src,
     // A copy that's missing, or a browser without WebP: use the original.
     onerror: ({ currentTarget: img }) => {

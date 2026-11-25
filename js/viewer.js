@@ -41,17 +41,19 @@ export function createViewer(photos, { onClose, preview } = {}) {
   function show(i, opts) {
     current = (i + photos.length) % photos.length;
     const p = photos[current];
-    // A copy that's here already shows at once; the sharp one replaces it.
+    // The sharp copy, if it's here already. If not, one that's on screen or small
+    // until the sharp one replaces it.
     const sharp = copyFor(p, drawnWidth(p));
-    const quick = preview?.(current) || p.thumb || sharp;
+    const next = new Image();
+    next.src = sharp;
+    const quick = next.complete ? sharp : preview?.(current) || p.thumb || sharp;
+    next.onload = () => { if (photos[current] === p && quick !== sharp) img.src = sharp; };
+    next.onerror = () => { if (photos[current] === p) img.src = p.src; };
+    // Until something arrives, its colors: without this the last photo stays up,
+    // stretched into this one's shape.
+    img.removeAttribute("src");
     img.style.cssText = p.width ? `--ar:${p.width / p.height};--natural:${p.width}px;${tone(p)}` : "";
     img.src = quick;
-    if (quick !== sharp) {
-      const next = new Image();
-      next.onload = () => { if (photos[current] === p) img.src = sharp; };
-      next.onerror = () => { if (photos[current] === p) img.src = p.src; };
-      next.src = sharp;
-    }
     img.alt = altText(p);
     $("v-line1").textContent = where(p);
     $("v-line2").textContent = gear(p);
