@@ -6,6 +6,7 @@ A film photography portfolio, live at https://abhinay-p.github.io/abhinay-pattip
 - **Photographs** (`photos.html`): a sideways-scrolling strip of photos, with film stocks freshly mixed on every visit. A camera-style dial under it (`js/dial.js`) turns through every frame: drag, swipe, flick or tap it, or focus it and use the arrow keys.
 - **Gallery** (`gallery.html`): every photo on one contact sheet, cut into strips that sit slightly askew as if laid by hand (the order and placement change on every visit). Hovering a frame shows a bigger preview, and clicking opens the photo on its own. A small toolbar at the bottom grows on hover (or tap). It lets visitors order the sheet by stock or show only one film stock; nothing is grouped unless they choose it.
 - **Design** (`design.html`, `js/design.js`, `css/design.css`): the decisions behind the site, with live demos that run the site's own code, and contact details. Pressing D there draws the strip's layout rules over a piece of it.
+- **Light table** (`table.html`, `js/table.js`, `js/placing.js`, `css/table.css`): mark frames in the Gallery, then drag, throw, stack and turn them, by pointer or keyboard. The arrangement is written in the link, so sharing the link shares the table.
 
 Photos are labelled by film stock. It has no framework and no build step, so it runs on any static host.
 

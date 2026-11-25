@@ -3,6 +3,7 @@ import { glide } from "./glide.js";
 import { createViewer, altText } from "./viewer.js";
 import { mixRolls, byStock } from "./order.js";
 import { copyFor, SHARP, tone, whenLoaded } from "./image.js";
+import { fromHash, nameOf, write, FULL } from "./placing.js";
 
 const gallery = document.getElementById("gallery");
 const loupe = document.getElementById("loupe");
@@ -40,6 +41,7 @@ function draw() {
           // Vertical shots lie sideways on the strip, like on a real contact sheet.
           const neg = el("button", { type: "button", class: p.height > p.width ? "neg portrait" : "neg", style: tone(p), "data-i": i, onclick: () => open(i), "aria-label": `View ${altText(p)}, frame ${i + 1}` }, img);
           whenLoaded(img, () => neg.classList.add("loaded"));
+          if (picks.has(nameOf(p))) mark(neg);
           return el("li", { class: "cell" }, neg,
             el("span", { class: "num", "aria-hidden": "true" }, String(i + 1)));
         }));
@@ -54,8 +56,57 @@ medium.addEventListener("change", () => draw());
 
 function open(i) {
   hideLoupe();
+  if (picking) return togglePick(i);
   viewer.show(i);
 }
+
+/* ---------- Picking for the light table ---------- */
+
+// Photos marked with a grease pencil, in the order they were marked. One that
+// came from a table keeps its place on it (see placing.js).
+const picks = new Map();
+let picking = false;
+const pick = document.getElementById("pick");
+const pickOpen = document.getElementById("pick-open");
+const pickSaid = document.getElementById("pick-said");
+
+function mark(neg) {
+  neg.setAttribute("aria-pressed", "true");
+  neg.append(el("span", { class: "mark", "aria-hidden": "true" }));
+}
+
+function togglePick(i) {
+  const name = nameOf(photos[i]);
+  const neg = gallery.querySelector(`.neg[data-i="${i}"]`);
+  if (picks.delete(name)) {
+    neg.setAttribute("aria-pressed", "false");
+    neg.querySelector(".mark").remove();
+  } else if (picks.size >= FULL) {
+    pickSaid.textContent = "The table is full";
+    return;
+  } else {
+    picks.set(name, { name });
+    mark(neg);
+  }
+  pickSaid.textContent = "";
+  showPicks();
+}
+
+function showPicks() {
+  pickOpen.hidden = !picking;
+  pickOpen.textContent = picks.size ? "Open with these" : "Open";
+  pickOpen.href = picks.size ? `table.html#t=${write([...picks.values()])}` : "table.html";
+}
+
+function setPicking(on) {
+  picking = on;
+  pick.setAttribute("aria-pressed", String(on));
+  pick.textContent = on ? "Done marking" : "Light table";
+  pickSaid.textContent = on ? "Mark frames to put on the table" : "";
+  document.body.classList.toggle("picking", on);
+  showPicks();
+}
+pick.addEventListener("click", () => setPicking(!picking));
 
 /* ---------- Loupe: a bigger preview that follows the pointer ---------- */
 
@@ -172,7 +223,9 @@ try {
   all = await loadPhotos();
   mixed = mixRolls(all);
   photos.push(...mixed);
+  for (const o of fromHash("pick") ?? []) if (all.some((p) => nameOf(p) === o.name)) picks.set(o.name, o);
   draw();
+  if (fromHash("pick")) setPicking(true);
   buildFilter();
   // After closing the viewer, return focus to the frame you were last on.
   viewer = createViewer(photos, {

@@ -16,6 +16,7 @@
   <link rel="modulepreload" href="js/gallery.js">
   <link rel="modulepreload" href="js/common.js">
   <link rel="modulepreload" href="js/image.js">
+  <link rel="modulepreload" href="js/placing.js">
   <link rel="modulepreload" href="js/glide.js">
   <link rel="modulepreload" href="js/motion.js">
   <link rel="modulepreload" href="js/viewer.js">
@@ -37,6 +38,13 @@
   <div class="filter" id="filter" role="toolbar" aria-label="Order and filter by film stock">
     <button type="button" class="filter-current" id="filter-current" aria-expanded="false" aria-controls="filter-options">All · mixed</button>
     <div class="filter-options" id="filter-options"><div class="filter-inner" id="filter-inner"></div></div>
+  </div>
+
+  <!-- Mark frames, then open them on the light table (table.html). -->
+  <div class="picker" id="picker">
+    <button type="button" id="pick" aria-pressed="false">Light table</button>
+    <a id="pick-open" href="table.html" hidden>Open</a>
+    <span id="pick-said" role="status"></span>
   </div>
 
   <!-- Bigger preview that follows the pointer while you hover a frame. -->
