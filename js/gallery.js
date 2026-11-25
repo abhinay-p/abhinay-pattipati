@@ -1,7 +1,8 @@
-import { loadJSON, el } from "./common.js";
+import { loadPhotos, el } from "./common.js";
 import { glide } from "./glide.js";
 import { createViewer, altText } from "./viewer.js";
 import { mixRolls, byStock } from "./order.js";
+import { copyFor, SHARP, tone, whenLoaded } from "./image.js";
 
 const gallery = document.getElementById("gallery");
 const loupe = document.getElementById("loupe");
@@ -35,10 +36,11 @@ function draw() {
       el("div", { class: "sheet" }, strips.map((strip) => {
         const ol = el("ol", { class: "filmstrip", start: strip[0][1] + 1 }, strip.map(([p, i]) => {
           p.frame = i + 1;
-          return el("li", { class: "cell" },
-            // Vertical shots lie sideways on the strip, like on a real contact sheet.
-            el("button", { type: "button", class: p.height > p.width ? "neg portrait" : "neg", "data-i": i, onclick: () => open(i), "aria-label": `View ${altText(p)}, frame ${i + 1}` },
-              el("img", { src: p.thumb || p.src, alt: "", loading: i < 12 ? "eager" : "lazy", decoding: "async" })),
+          const img = el("img", { src: p.thumb || p.src, alt: "", loading: i < 12 ? "eager" : "lazy", decoding: "async" });
+          // Vertical shots lie sideways on the strip, like on a real contact sheet.
+          const neg = el("button", { type: "button", class: p.height > p.width ? "neg portrait" : "neg", style: tone(p), "data-i": i, onclick: () => open(i), "aria-label": `View ${altText(p)}, frame ${i + 1}` }, img);
+          whenLoaded(img, () => neg.classList.add("loaded"));
+          return el("li", { class: "cell" }, neg,
             el("span", { class: "num", "aria-hidden": "true" }, String(i + 1)));
         }));
         const shift = Math.min(10, innerWidth * 0.012);
@@ -58,6 +60,7 @@ function open(i) {
 /* ---------- Loupe: a bigger preview that follows the pointer ---------- */
 
 let shown = -1;
+let sharpen = 0;
 
 function showLoupe(i) {
   const p = photos[i];
@@ -68,10 +71,14 @@ function showLoupe(i) {
   const w = Math.min(maxW, maxH * ar);
   loupeImg.style.width = `${w}px`;
   loupeImg.style.height = `${w / ar}px`;
-  loupeImg.src = p.thumb || p.src; // instant, then sharpen with the full photo
-  const full = new Image();
-  full.onload = () => { if (shown === i) loupeImg.src = p.src; };
-  full.src = p.src;
+  loupeImg.src = p.thumb || p.src; // instant, then sharper if the pointer stays
+  clearTimeout(sharpen);
+  sharpen = setTimeout(() => {
+    const url = copyFor(p, w, SHARP);
+    const full = new Image();
+    full.onload = () => { if (shown === i) loupeImg.src = url; };
+    full.src = url;
+  }, 120); // sweeping across the sheet shouldn't download every frame on the way
   loupeLabel.textContent = [p.stock, `Frame ${p.frame}`].filter(Boolean).join(" · ");
   loupe.classList.add("on");
 }
@@ -87,6 +94,7 @@ function placeLoupe(x, y) {
 
 function hideLoupe() {
   shown = -1;
+  clearTimeout(sharpen);
   loupe.classList.remove("on");
 }
 
@@ -161,7 +169,7 @@ filter.addEventListener("keydown", (e) => { if (e.key === "Escape") { setOpen(fa
 /* ---------- Start ---------- */
 
 try {
-  all = await loadJSON("content/photos.json");
+  all = await loadPhotos();
   mixed = mixRolls(all);
   photos.push(...mixed);
   draw();

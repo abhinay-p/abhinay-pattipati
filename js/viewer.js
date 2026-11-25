@@ -3,6 +3,7 @@
 // named after its file (#portra400_12), so Back closes it and links can be
 // shared; names stay valid even though the strip's order changes every visit.
 import { closeOnBackdrop, modalHistory, deepLink } from "./common.js";
+import { copyFor, tone } from "./image.js";
 
 /* ---------- Labels ---------- */
 
@@ -22,31 +23,50 @@ const photoId = (p) => p.src.split("/").pop().replace(/\.[^.]+$/, "");
 
 // Returns { show(i), get current, get open }. onClose(i) runs with the index
 // of the last photo shown, so the page can bring that photo into view.
-export function createViewer(photos, { onClose } = {}) {
+// preview(i), if given, is the URL of a copy that's already on screen.
+export function createViewer(photos, { onClose, preview } = {}) {
   const viewer = document.getElementById("viewer");
   const img = document.getElementById("v-img");
   const $ = (id) => document.getElementById(id);
   const openViewer = modalHistory(viewer);
+  const stage = viewer.querySelector(".stage");
   let current = 0;
+
+  // How wide a photo is drawn (see .stage img in photo.css).
+  function drawnWidth(p) {
+    const pad = parseFloat(getComputedStyle(stage).paddingLeft) || 0;
+    return Math.min(innerWidth - pad * 2, (innerHeight - 170) * (p.width / p.height), p.width);
+  }
 
   function show(i, opts) {
     current = (i + photos.length) % photos.length;
     const p = photos[current];
-    img.classList.add("loading");
-    img.onload = () => img.classList.remove("loading");
-    img.src = p.src;
+    // A copy that's here already shows at once; the sharp one replaces it.
+    const sharp = copyFor(p, drawnWidth(p));
+    const quick = preview?.(current) || p.thumb || sharp;
+    img.style.cssText = p.width ? `--ar:${p.width / p.height};--natural:${p.width}px;${tone(p)}` : "";
+    img.src = quick;
+    if (quick !== sharp) {
+      const next = new Image();
+      next.onload = () => { if (photos[current] === p) img.src = sharp; };
+      next.onerror = () => { if (photos[current] === p) img.src = p.src; };
+      next.src = sharp;
+    }
     img.alt = altText(p);
     $("v-line1").textContent = where(p);
     $("v-line2").textContent = gear(p);
     openViewer(`#${photoId(p)}`, opts);
-    if (photos.length > 1) new Image().src = photos[(current + 1) % photos.length].src;
+    if (photos.length > 1) {
+      const after = photos[(current + 1) % photos.length];
+      new Image().src = copyFor(after, drawnWidth(after));
+    }
   }
 
   $("v-prev").onclick = () => show(current - 1);
   $("v-next").onclick = () => show(current + 1);
   $("v-close").onclick = () => viewer.close();
   closeOnBackdrop(viewer);
-  viewer.querySelector(".stage").addEventListener("click", (e) => { if (e.target !== img) viewer.close(); });
+  stage.addEventListener("click", (e) => { if (e.target !== img) viewer.close(); });
   viewer.addEventListener("close", () => onClose?.(current));
 
   document.addEventListener("keydown", (e) => {

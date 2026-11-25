@@ -8,6 +8,10 @@ A film photography portfolio, live at https://abhinay-p.github.io/abhinay-pattip
 
 Photos are labelled by film stock. It has no framework and no build step, so it runs on any static host.
 
+## How photos load
+
+Every photo's place on the page starts as its own two colors (the average of its top and bottom halves), and the photo fades in over them. The browser picks from three sizes: WebP copies 960px and 1600px on the long edge, and the 2000px original. Off-screen photos wait until they're close. `js/image.js` makes those choices, and `el()` in `js/common.js` sets `src` last, because a photo that gets its `src` before `loading="lazy"` can start downloading at once.
+
 ## Run locally
 
 ```bash
@@ -21,7 +25,7 @@ Then open http://localhost:4321. The pages load `content/photos.json` with `fetc
 1. Drop JPGs into `images/film/`, named `<stock>_<NN>.jpg` in frame order, for example `portra400_37.jpg`. The stock part becomes the label: `portra400` → "Portra 400", `gold200` → "Kodak Gold 200", `phoenix200` → "Harman Phoenix 200". A date and location are optional: `2025-06_portra400_big-sur_01.jpg`.
 2. Run `npm run photos`. It needs Python with Pillow (`pip install pillow`).
 
-That shrinks anything larger than 2000px, strips EXIF data (scanner, camera, dates, any location), makes the gallery thumbnails in `images/film/thumbs/`, and regenerates `content/photos.json`. You can hand-edit any entry to change the `location`, `date`, `camera` or `stock`, or to add `alt` text, and those edits are kept the next time you run it.
+That shrinks anything larger than 2000px, strips EXIF data (scanner, camera, dates, any location), makes the gallery thumbnails in `images/film/thumbs/` and smaller WebP copies in `images/film/web/`, works out each photo's two main colors, and regenerates `content/photos.json`. Only new or replaced photos are redone; `images/film/web/manifest.json` keeps track. You can hand-edit any entry to change the `location`, `date`, `camera` or `stock`, or to add `alt` text, and those edits are kept the next time you run it.
 
 Once the site is on GitHub, you can skip both steps and use the browser instead (see below).
 
@@ -55,7 +59,7 @@ Go to **https://abhinay-p.github.io/abhinay-pattipati/admin/**. That page isn't 
 
 1. Open the admin link and go to **Media**.
 2. Upload your scans. They are saved in `images/film/`. Use the `<stock>_<NN>.jpg` names from above so the label fills itself in.
-3. Each upload starts the **Regenerate photos.json** Action (`.github/workflows/photos.yml`). It runs `npm run photos` and commits the shrunk photo, its thumbnail and `content/photos.json`. You can watch it in the repo's **Actions** tab. It takes about a minute.
+3. Each upload starts the **Regenerate photos.json** Action (`.github/workflows/photos.yml`). It runs `npm run photos` and commits the shrunk photo, its thumbnail and smaller copies, and `content/photos.json`. You can watch it in the repo's **Actions** tab. It takes about a minute.
 
 **Edit labels**
 

@@ -6,10 +6,24 @@
   <title>Photographs · Abhinay Pattipati</title>
   <meta name="description" content="Photographs by Abhinay Pattipati.">
   <meta name="theme-color" content="#f6f2ea">
+  <link rel="icon" href="data:,">
+  <!-- Ask for everything at once, instead of one file leading to the next. -->
+  <script>
+    window.photosRequest = fetch("content/photos.json", { cache: "no-cache" });
+    window.photosRequest.catch(() => {}); // the page itself reports a failure
+  </script>
+  <link rel="stylesheet" href="css/photo.css">
+  <link rel="modulepreload" href="js/strip.js">
+  <link rel="modulepreload" href="js/common.js">
+  <link rel="modulepreload" href="js/image.js">
+  <link rel="modulepreload" href="js/glide.js">
+  <link rel="modulepreload" href="js/motion.js">
+  <link rel="modulepreload" href="js/viewer.js">
+  <link rel="modulepreload" href="js/order.js">
+  <!-- Karla arrives without holding up the page; the system font stands in. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/photo.css">
+  <link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 </head>
 <body>
   <header class="bar">

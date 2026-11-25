@@ -1,7 +1,8 @@
-import { loadJSON, el } from "./common.js";
+import { loadPhotos, el } from "./common.js";
 import { glide } from "./glide.js";
 import { createViewer, where, gear, altText } from "./viewer.js";
 import { mixRolls } from "./order.js";
+import { photoImg, sizesFor, tone, whenLoaded } from "./image.js";
 
 const strip = document.getElementById("strip");
 const scroller = glide(strip);
@@ -35,20 +36,37 @@ function placeFrame(photo, i, n) {
 }
 
 function draw(photos) {
-  strip.replaceChildren(...photos.map((p, i) => {
+  const frames = photos.map((p, i) => {
     const { size, offset, gap } = placeFrame(p, i, photos.length);
-    const img = el("img", { src: p.src, alt: altText(p), loading: i < 4 ? "eager" : "lazy", decoding: "async", width: p.width, height: p.height });
-    img.addEventListener("load", () => img.classList.add("loaded"), { once: true });
-    if (img.complete) img.classList.add("loaded");
     const frame = el("figure", { class: "frame" },
-      el("button", { type: "button", onclick: () => viewer.show(i), "aria-label": `View ${altText(p)}` }, img),
+      el("button", { type: "button", onclick: () => viewer.show(i), "aria-label": `View ${altText(p)}` }),
       (where(p) || gear(p)) && el("figcaption", { "aria-hidden": "true" },
         where(p) && el("span", {}, where(p)),
         gear(p) && el("span", {}, gear(p))));
-    frame.style.cssText = `--size:${size};--offset:${offset};--gap:${gap};--ar:${p.width / p.height || 1.5}`;
+    frame.style.cssText = `--size:${size};--offset:${offset};--gap:${gap};--ar:${p.width / p.height || 1.5};${tone(p)}`;
     return frame;
-  }));
+  });
+  strip.replaceChildren(...frames);
+  // The photos go in once their frames have a size, so each can ask for the
+  // right copy of itself. Until then its colors hold the place.
+  const widths = frames.map((f) => f.offsetWidth);
+  frames.forEach((frame, i) => {
+    const img = photoImg(photos[i], widths[i], { alt: altText(photos[i]), loading: i < 4 ? "eager" : "lazy" });
+    whenLoaded(img, () => img.classList.add("loaded"));
+    frame.firstElementChild.append(img);
+  });
 }
+
+// A bigger window may need bigger copies.
+let resized = 0;
+addEventListener("resize", () => {
+  clearTimeout(resized);
+  resized = setTimeout(() => {
+    const imgs = [...strip.querySelectorAll("img[sizes]")];
+    const sizes = imgs.map((img) => sizesFor(img.parentElement.offsetWidth));
+    imgs.forEach((img, i) => { if (img.sizes !== sizes[i]) img.sizes = sizes[i]; });
+  }, 200);
+});
 
 /* ---------- Keyboard: step one photo at a time ---------- */
 
@@ -73,11 +91,16 @@ document.addEventListener("keydown", (e) => {
 
 try {
   // A fresh mix of film stocks on every visit.
-  const photos = mixRolls(await loadJSON("content/photos.json"));
+  const photos = mixRolls(await loadPhotos());
   draw(photos);
   strip.focus({ preventScroll: true });
   // On closing the viewer, bring the strip to the photo you were last looking at.
   viewer = createViewer(photos, {
+    // Opens with the copy already on screen, then sharpens.
+    preview(i) {
+      const img = strip.children[i]?.querySelector("img.loaded");
+      return img?.currentSrc;
+    },
     onClose(i) {
       const f = strip.children[i];
       if (f) scroller.to(f.offsetLeft - (strip.clientWidth - f.offsetWidth) / 2);

@@ -11,7 +11,17 @@
     // now live on the Photographs page; send them there.
     if (/^#[\w.-]+$/.test(location.hash)) location.replace("photos.html" + location.hash);
   </script>
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="css/photo.css">
+  <!-- The next page's files, fetched while this one is idle. -->
+  <link rel="prefetch" href="photos.html">
+  <link rel="prefetch" href="js/strip.js">
+  <link rel="prefetch" href="js/common.js">
+  <link rel="prefetch" href="js/image.js">
+  <link rel="prefetch" href="js/glide.js">
+  <link rel="prefetch" href="js/motion.js">
+  <link rel="prefetch" href="js/viewer.js">
+  <link rel="prefetch" href="js/order.js">
 </head>
 <body class="landing">
   <!-- Fallback if WebGL is unavailable: the photograph, blurred. -->
