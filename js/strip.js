@@ -2,7 +2,7 @@ import { loadPhotos, el } from "./common.js";
 import { glide } from "./glide.js";
 import { createViewer, where, gear, altText } from "./viewer.js";
 import { mixRolls } from "./order.js";
-import { photoImg, sizesFor, tone, whenLoaded } from "./image.js";
+import { photoImg, sizesFor, tickColors, tone, whenLoaded } from "./image.js";
 import { createDial } from "./dial.js";
 
 const strip = document.getElementById("strip");
@@ -158,11 +158,7 @@ strip.addEventListener("wheel", () => dial?.stop(), { passive: true });
 strip.addEventListener("pointerdown", () => dial?.stop());
 
 function addDial(photos) {
-  // A tick as pale as the page would vanish, so each color is mixed with a
-  // little of the page's ink (#2b2a27).
-  const INK = [43, 42, 39];
-  const onCream = (hex) => `rgb(${INK.map((v, k) => Math.round(parseInt(hex.slice(1 + k * 2, 3 + k * 2), 16) * 0.82 + v * 0.18))})`;
-  const colors = photos.map((p) => (p.colors ?? ["#8a8378", "#8a8378"]).map(onCream));
+  const colors = photos.map(tickColors);
   dial = createDial(dialRoot, {
     count: photos.length,
     colorsOf: (i) => colors[i],

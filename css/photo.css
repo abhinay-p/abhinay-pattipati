@@ -256,11 +256,19 @@ dialog { border: 0; padding: 0; color: inherit; }
 /* ---------------- Small screens ---------------- */
 @media (max-width: 640px) {
   :root { --bar: 60px; }
+  .bar { gap: 12px; }
+  .bar .name { white-space: nowrap; letter-spacing: .02em; }
+  .bar nav { gap: 14px; }
   /* Same height for every photo, but a wide one never gets wider than the screen. */
   .frame {
     height: min(calc(var(--stage) * .7), calc((100vw - var(--pad) * 3) / var(--ar)));
     margin-top: calc(var(--stage) * .12); margin-left: var(--pad);
   }
+}
+
+@media (max-width: 380px) {
+  .bar { font-size: 13px; }
+  .bar nav { gap: 11px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Design · Abhinay Pattipati</title>
+  <meta name="description" content="The design decisions behind Abhinay Pattipati's photography site, with live demos.">
+  <meta name="theme-color" content="#f6f2ea">
+  <link rel="icon" href="data:,">
+  <!-- Ask for everything at once, instead of one file leading to the next. -->
+  <script>
+    window.photosRequest = fetch("content/photos.json", { cache: "no-cache" });
+    window.photosRequest.catch(() => {}); // the demos do without it
+  </script>
+  <link rel="stylesheet" href="css/photo.css">
+  <link rel="stylesheet" href="css/design.css">
+  <link rel="modulepreload" href="js/design.js">
+  <link rel="modulepreload" href="js/common.js">
+  <link rel="modulepreload" href="js/image.js">
+  <link rel="modulepreload" href="js/glide.js">
+  <link rel="modulepreload" href="js/motion.js">
+  <link rel="modulepreload" href="js/dial.js">
+  <link rel="modulepreload" href="js/order.js">
+  <!-- Karla arrives without holding up the page; the system font stands in. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+</head>
+<body class="design-page">
+  <header class="bar">
+    <a class="name" href="./">Abhinay Pattipati</a>
+    <nav aria-label="Main"><a href="photos.html">Photographs</a><a href="gallery.html">Gallery</a><a href="design.html" aria-current="page">Design</a></nav>
+  </header>
+
+  <main class="design" id="design" tabindex="0" aria-label="Design">
+    <div class="column">
+      <h1>How this site is designed</h1>
+      <p class="lead">This is a photography site first. Each section below is one decision behind it: the problem, what was built, and what changed when it was measured. Every demo runs the site's own code.</p>
+      <p class="todo">[One line about you and the role you're looking for]</p>
+      <ul class="jump">
+        <li><a href="#loading">Photos arrive as their own colors</a></li>
+        <li><a href="#dial">A dial for the whole strip</a></li>
+        <li><a href="#shuffle">Shuffled, but never the same film twice in a row</a></li>
+        <li><a href="#motion">Springs, not timers</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+
+      <section id="loading" aria-labelledby="loading-h">
+        <h2 id="loading-h">Photos arrive as their own colors</h2>
+        <dl>
+          <dt>Problem</dt>
+          <dd>The first visit to Photographs fetched only the photos near the screen. Coming back fetched all the rest: 165.6 MB. Photos off screen were marked to load later, but each was given its address before that instruction, so a browser that remembered them started all of them at once.</dd>
+          <dt>Decision</dt>
+          <dd>Set the address last. Make two smaller copies of every photo, and let each screen pick the smallest that looks sharp. Until a photo arrives, the average colors of its top and bottom halves hold its place.</dd>
+          <dt>Trade-off</dt>
+          <dd>The first smaller copies kept 77% of the film grain. Raising their quality kept 88%, for about 40% more data, and that's the one the site uses. <span class="todo">[Why the grain matters to you]</span></dd>
+        </dl>
+        <div class="demo" id="loading-demo">
+          <p class="demo-note">The same photo, arriving after a pretend 1.5-second wait.</p>
+          <div class="arrivals">
+            <figure><div class="arrival"></div><figcaption>Blank</figcaption></figure>
+            <figure><div class="arrival gray"></div><figcaption>Gray</figcaption></figure>
+            <figure><div class="arrival tones"></div><figcaption>Its own colors</figcaption></figure>
+          </div>
+          <button type="button" class="demo-btn" id="loading-again">Load again</button>
+        </div>
+        <table>
+          <caption>Photographs at 1440 pixels wide, clean cache</caption>
+          <thead><tr><td></td><th scope="col">Before</th><th scope="col">Now</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">First visit</th><td>2.0 MB</td><td>about 0.6 MB</td></tr>
+            <tr><th scope="row">Second visit</th><td>165.6 MB</td><td>about 0.6 MB</td></tr>
+            <tr><th scope="row">First photo, on a slow line</th><td>1.05 s</td><td>0.79 s</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="dial" aria-labelledby="dial-h">
+        <h2 id="dial-h">A dial for the whole strip</h2>
+        <dl>
+          <dt>Problem</dt>
+          <dd>At 1440 by 900 the strip was about 193 screens long, and nothing showed where you were. A scrollbar's handle would have been about 7 pixels wide.</dd>
+          <dt>Decision</dt>
+          <dd>A dial like the one on a camera: one tick for each photo, in that photo's own colors, turning under a fixed needle. Drag, swipe, flick or tap it, or use the arrow keys. The frame number and film stock say where you are.</dd>
+          <dt>Trade-off</dt>
+          <dd>The order is shuffled on every visit, so the dial can't point to a particular roll. It says how far along you are, and which film you're looking at.</dd>
+          <dt>Result</dt>
+          <dd>Arrow keys reach every photo, and four flicks cross the whole strip. Photos that only fly past show their colors and download nothing. On a 120 Hz screen the dial drew a frame every 8.3 ms, and none took longer than 17 ms.</dd>
+        </dl>
+        <div class="demo" id="dial-demo">
+          <div class="dial-photo" id="dial-photo"><img alt=""></div>
+          <div class="dial" id="dial-live" role="slider" tabindex="0" aria-label="Film dial demo" aria-orientation="horizontal"></div>
+        </div>
+      </section>
+
+      <section id="shuffle" aria-labelledby="shuffle-h">
+        <h2 id="shuffle-h">Shuffled, but never the same film twice in a row</h2>
+        <dl>
+          <dt>Problem</dt>
+          <dd>The strip mixes film stocks so that every visit shows a variety. The rolls are uneven, though, so a plain shuffle puts two of the same film side by side about 48 times.</dd>
+          <dt>Decision</dt>
+          <dd>Shuffle each roll, then deal from a random roll that isn't the one just dealt, favoring the rolls with the most left.</dd>
+          <dt>Trade-off</dt>
+          <dd>If one roll outnumbers all the others put together, it has to be dealt next, or its photos would pile up at the end.</dd>
+        </dl>
+        <div class="demo" id="shuffle-demo">
+          <p class="demo-note">The start of each, labeled by film. Repeats are filled in.</p>
+          <div class="deal"><h3>Plain shuffle</h3><div class="cards" id="deal-plain"></div><p id="count-plain"></p></div>
+          <div class="deal"><h3>This site</h3><div class="cards" id="deal-site"></div><p id="count-site"></p></div>
+          <button type="button" class="demo-btn" id="shuffle-again">Shuffle again</button>
+        </div>
+      </section>
+
+      <section id="motion" aria-labelledby="motion-h">
+        <h2 id="motion-h">Springs, not timers</h2>
+        <dl>
+          <dt>Problem</dt>
+          <dd>A timed animation follows a fixed path. Change where it's going halfway and it starts again from rest, so pressing back mid-move jerks.</dd>
+          <dt>Decision</dt>
+          <dd>Everything that moves rides a spring, which knows only where it is, how fast it's going and where it's headed. Let go of the dial mid-flick and it carries on at the speed of your hand.</dd>
+          <dt>Trade-off</dt>
+          <dd>The ends of a page stay hard stops, because faking a bounce there would fight the browser's own scrolling. If your system asks for less motion, everything jumps straight to its end.</dd>
+          <dt>Result</dt>
+          <dd>Ordinary scrolling follows your hand as closely as it did before, and moves settle 150 to 290 ms sooner.</dd>
+        </dl>
+        <div class="demo" id="motion-demo">
+          <p class="demo-note" id="motion-note">Press Move several times quickly. Both take about half a second.</p>
+          <div class="track"><span>Timer</span><div class="runner timed" id="runner-timed"></div></div>
+          <div class="track"><span>Spring</span><div class="runner" id="runner-spring"></div></div>
+          <button type="button" class="demo-btn" id="motion-go">Move</button>
+        </div>
+      </section>
+
+      <p class="measured">Measured on 25 November 2026 on a local copy of the site, with the photos in place. The slow line adds 150 ms to every request.</p>
+
+      <section id="contact" aria-labelledby="contact-h">
+        <h2 id="contact-h">Contact</h2>
+        <address>
+          <p>Abhinay Pattipati</p>
+          <p><a href="mailto:abhinaypattipati@gmail.com">abhinaypattipati@gmail.com</a> <button type="button" class="demo-btn" id="copy-email">Copy</button> <span id="copied" role="status"></span></p>
+          <p class="todo">[LinkedIn URL]</p>
+        </address>
+      </section>
+    </div>
+  </main>
+
+  <script src="js/design.js" type="module"></script>
+</body>
+</html>

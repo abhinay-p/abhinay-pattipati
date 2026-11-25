@@ -34,6 +34,12 @@ export const sizesFor = (cssWidth) => `${Math.ceil(cssWidth * Math.min(1, SHARP 
 // The photo's own two colors, for CSS to show while it loads.
 export const tone = (p) => (p.colors ? `--tone-a:${p.colors[0]};--tone-b:${p.colors[1]};` : "");
 
+// The same two colors for a thin mark on the cream page: mixed with a little of
+// its ink (#2b2a27), so a pale photo's tick doesn't vanish.
+const INK = [43, 42, 39];
+const onCream = (hex) => `rgb(${INK.map((v, k) => Math.round(parseInt(hex.slice(1 + k * 2, 3 + k * 2), 16) * 0.82 + v * 0.18))})`;
+export const tickColors = (p) => (p.colors ?? ["#8a8378", "#8a8378"]).map(onCream);
+
 // An <img> for a photo shown cssWidth wide while browsing.
 export function photoImg(p, cssWidth, attrs = {}) {
   const copies = copiesOf(p);
