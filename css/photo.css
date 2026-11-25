@@ -270,6 +270,10 @@ dialog { border: 0; padding: 0; color: inherit; }
   .bar { font-size: 13px; }
   .bar nav { gap: 11px; }
 }
+@media (max-width: 340px) {
+  .bar { font-size: 12px; gap: 8px; }
+  .bar nav { gap: 8px; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
