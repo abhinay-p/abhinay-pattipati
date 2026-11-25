@@ -39,7 +39,7 @@ function draw() {
           p.frame = i + 1;
           const img = el("img", { src: p.thumb || p.src, alt: "", loading: i < 12 ? "eager" : "lazy", decoding: "async" });
           // Vertical shots lie sideways on the strip, like on a real contact sheet.
-          const neg = el("button", { type: "button", class: p.height > p.width ? "neg portrait" : "neg", style: tone(p), "data-i": i, onclick: () => open(i), "aria-label": `View ${altText(p)}, frame ${i + 1}` }, img);
+          const neg = el("button", { type: "button", class: p.height > p.width ? "neg portrait" : "neg", style: tone(p), "data-i": i, onclick: () => open(i), "aria-label": labelFor(i) }, img);
           whenLoaded(img, () => neg.classList.add("loaded"));
           if (picks.has(nameOf(p))) mark(neg);
           return el("li", { class: "cell" }, neg,
@@ -69,6 +69,9 @@ let picking = false;
 const pick = document.getElementById("pick");
 const pickOpen = document.getElementById("pick-open");
 const pickSaid = document.getElementById("pick-said");
+
+// What pressing a frame will do, then which frame it is.
+const labelFor = (i) => `${picking ? "Mark" : "View"} ${altText(photos[i])}, frame ${i + 1}`;
 
 function mark(neg) {
   neg.setAttribute("aria-pressed", "true");
@@ -100,10 +103,10 @@ function showPicks() {
 
 function setPicking(on) {
   picking = on;
-  pick.setAttribute("aria-pressed", String(on));
   pick.textContent = on ? "Done marking" : "Light table";
   pickSaid.textContent = on ? "Mark frames to put on the table" : "";
   document.body.classList.toggle("picking", on);
+  for (const neg of gallery.querySelectorAll(".neg")) neg.setAttribute("aria-label", labelFor(+neg.dataset.i));
   showPicks();
 }
 pick.addEventListener("click", () => setPicking(!picking));

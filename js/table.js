@@ -105,7 +105,7 @@ function holdable(t) {
     if (e.button) return;
     node.setPointerCapture(e.pointerId);
     for (const s of [t.springs.x, t.springs.y]) s.stop();
-    const onTop = t.z === top;
+    const onTop = prints.every((p) => p.z <= t.z);
     lift(t);
     node.classList.add("held");
     hold = { id: e.pointerId, dx: t.x - e.clientX, dy: t.y - e.clientY, fromX: e.clientX, fromY: e.clientY, moved: 0, onTop,

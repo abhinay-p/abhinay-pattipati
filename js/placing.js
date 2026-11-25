@@ -21,7 +21,12 @@ export function read(text) {
   }).slice(0, FULL);
 }
 
-export const fromHash = (key) => {
-  const at = location.hash.indexOf(`#${key}=`);
-  return at === 0 ? read(decodeURIComponent(location.hash.slice(key.length + 2))) : null;
-};
+// The arrangement in this page's own link, if it has one that can be read.
+export function fromHash(key) {
+  if (!location.hash.startsWith(`#${key}=`)) return null;
+  try {
+    return read(decodeURIComponent(location.hash.slice(key.length + 2)));
+  } catch {
+    return null; // a link cut short or mistyped, such as one ending in %
+  }
+}
