@@ -68,6 +68,8 @@ const byFile = new Map(existing.map((p) => [p.src, p]));
 const files = (await readdir(FILM_DIR)).filter((f) => EXTS.has(extname(f).toLowerCase()));
 // Small copies for the gallery's contact sheets, made by scripts/prepare-photos.py.
 const thumbs = new Set(await readdir(join(FILM_DIR, "thumbs")).catch(() => []));
+// Main colors, also from prepare-photos.py. A photo that has them has its smaller copies too.
+const made = await readFile(join(FILM_DIR, "web/manifest.json"), "utf8").then(JSON.parse).catch(() => ({}));
 const photos = await Promise.all(files.map(async (file) => {
   const src = `images/film/${file}`;
   const ext = extname(file).toLowerCase();
@@ -75,7 +77,7 @@ const photos = await Promise.all(files.map(async (file) => {
   const guessed = parseFilename(name);
   const thumb = thumbs.has(`${name}.jpg`) ? `images/film/thumbs/${name}.jpg` : undefined;
   // Hand edits in photos.json win over anything guessed from the filename.
-  return { src, ...guessed, ...byFile.get(src), thumb, ...dimensions(await readFile(join(FILM_DIR, file)), ext) };
+  return { src, ...guessed, ...byFile.get(src), thumb, colors: made[name]?.colors, ...dimensions(await readFile(join(FILM_DIR, file)), ext) };
 }));
 
 photos.sort((a, b) => (b.date || "").localeCompare(a.date || "") || a.src.localeCompare(b.src));

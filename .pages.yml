@@ -51,6 +51,12 @@ content:
         type: string
         readonly: true
         description: Small copy for the gallery, made by the photos Action.
+      - name: colors
+        label: Main colors
+        type: string
+        list: true
+        readonly: true
+        description: Top and bottom color, shown while the photo loads. Made by the photos Action.
       - name: width
         label: Width (px)
         type: number
