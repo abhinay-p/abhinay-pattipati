@@ -28,7 +28,6 @@ function layoutDemo(photos) {
   const show = (on) => {
     mini.classList.toggle("showing", on);
     $("legend").hidden = !on;
-    toggle.setAttribute("aria-pressed", String(on));
     toggle.textContent = on ? "Hide the design (D)" : "Show the design (D)";
   };
   toggle.onclick = () => show(!mini.classList.contains("showing"));
