@@ -49,11 +49,11 @@
         <h2 id="loading-h">Photos arrive as their own colors</h2>
         <dl>
           <dt>Problem</dt>
-          <dd>The first visit to Photographs fetched only the photos near the screen. Coming back fetched all the rest: 165.6 MB. Photos off screen were marked to load later, but each was given its address before that instruction, so a browser that remembered them started all of them at once.</dd>
+          <dd>The first visit to Photographs fetched only the photos near the screen. Coming back fetched all the rest: about 166 MB. Photos off screen were marked to load later, but each was given its address before that instruction, so a browser that remembered them started all of them at once.</dd>
           <dt>Decision</dt>
           <dd>Set the address last. Make two smaller copies of every photo, and let each screen pick the smallest that looks sharp. Until a photo arrives, the average colors of its top and bottom halves hold its place.</dd>
           <dt>Trade-off</dt>
-          <dd>The first smaller copies kept 77% of the film grain. Raising their quality kept 88%, for about 40% more data, and that's the one the site uses. <span class="todo">[Why the grain matters to you]</span></dd>
+          <dd>The first smaller copies kept 75% of the film grain. Raising their quality kept 85%, for about 40% more data, and that's the one the site uses. <span class="todo">[Why the grain matters to you]</span></dd>
         </dl>
         <div class="demo" id="loading-demo">
           <p class="demo-note">The same photo, arriving after a pretend 1.5-second wait.</p>
@@ -68,9 +68,9 @@
           <caption>Photographs at 1440 pixels wide, clean cache</caption>
           <thead><tr><td></td><th scope="col">Before</th><th scope="col">Now</th></tr></thead>
           <tbody>
-            <tr><th scope="row">First visit</th><td>2.0 MB</td><td>about 0.6 MB</td></tr>
-            <tr><th scope="row">Second visit</th><td>165.6 MB</td><td>about 0.6 MB</td></tr>
-            <tr><th scope="row">First photo, on a slow line</th><td>1.05 s</td><td>0.79 s</td></tr>
+            <tr><th scope="row">First visit</th><td>about 2 MB</td><td>about 0.7 MB</td></tr>
+            <tr><th scope="row">Second visit</th><td>about 166 MB</td><td>about 0.7 MB</td></tr>
+            <tr><th scope="row">First photo, on a slow line</th><td>0.98 s</td><td>0.68 s</td></tr>
           </tbody>
         </table>
       </section>
@@ -79,7 +79,7 @@
         <h2 id="dial-h">A dial for the whole strip</h2>
         <dl>
           <dt>Problem</dt>
-          <dd>At 1440 by 900 the strip was about 193 screens long, and nothing showed where you were. A scrollbar's handle would have been about 7 pixels wide.</dd>
+          <dd>At 1440 by 900 the strip was about 192 screens long, and nothing showed where you were. A scrollbar's handle would have been about 7 pixels wide.</dd>
           <dt>Decision</dt>
           <dd>A dial like the one on a camera: one tick for each photo, in that photo's own colors, turning under a fixed needle. Drag, swipe, flick or tap it, or use the arrow keys. The frame number and film stock say where you are.</dd>
           <dt>Trade-off</dt>
@@ -117,11 +117,11 @@
           <dt>Problem</dt>
           <dd>A timed animation follows a fixed path. Change where it's going halfway and it starts again from rest, so pressing back mid-move jerks.</dd>
           <dt>Decision</dt>
-          <dd>Everything that moves rides a spring, which knows only where it is, how fast it's going and where it's headed. Let go of the dial mid-flick and it carries on at the speed of your hand.</dd>
+          <dd>Scrolling and the dial ride springs, which know only where they are, how fast they're going and where they're headed. Let go of the dial mid-flick and it carries on at the speed of your hand.</dd>
           <dt>Trade-off</dt>
           <dd>The ends of a page stay hard stops, because faking a bounce there would fight the browser's own scrolling. If your system asks for less motion, everything jumps straight to its end.</dd>
           <dt>Result</dt>
-          <dd>Ordinary scrolling follows your hand as closely as it did before, and moves settle 150 to 290 ms sooner.</dd>
+          <dd>Ordinary scrolling follows your hand as closely as it did before. A notch of the wheel settles about 0.2 seconds sooner, and an arrow key's step about a third of a second sooner.</dd>
         </dl>
         <div class="demo" id="motion-demo">
           <p class="demo-note" id="motion-note">Press Move several times quickly. Both take about half a second.</p>
