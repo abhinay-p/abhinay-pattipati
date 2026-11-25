@@ -108,9 +108,11 @@ function stopAt(frame) {
   return stops[lo] + (next - stops[lo]) * (frame - lo);
 }
 
-// Go to a scroll position, noting at once where that leaves the strip: a resize
-// can arrive before the browser's own scroll event does.
+// Go to a scroll position, taking over from a dial that's still turning, and
+// note at once where that leaves the strip: a resize can arrive before the
+// browser's own scroll event does.
 function moveTo(x) {
+  dial?.stop();
   scroller.to(x);
   here = frameAt(strip.scrollLeft);
 }
@@ -172,8 +174,9 @@ function addDial(photos) {
     onStep: (by) => stepFrame(by),
   });
   dialRoot.addEventListener("wheel", (e) => {
+    if (e.ctrlKey) return; // pinch-to-zoom
     e.preventDefault();
-    scroller.to(scroller.target + (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY));
+    moveTo(scroller.target + (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY));
   }, { passive: false });
 }
 
