@@ -3,10 +3,13 @@ import { glide } from "./glide.js";
 import { createViewer, where, gear, altText } from "./viewer.js";
 import { mixRolls } from "./order.js";
 import { photoImg, sizesFor, tone, whenLoaded } from "./image.js";
+import { createDial } from "./dial.js";
 
 const strip = document.getElementById("strip");
+const dialRoot = document.getElementById("dial");
 const scroller = glide(strip);
 let viewer = null;
+let dial = null;
 
 /* ---------- Layout ---------- */
 
@@ -68,23 +71,109 @@ addEventListener("resize", () => {
   }, 200);
 });
 
-/* ---------- Keyboard: step one photo at a time ---------- */
+/* ---------- Where each frame stops ---------- */
 
-function stepFrame(dir) {
+// The scroll position for each frame. The first frame stops at the left margin,
+// the last at the right, and the ones between move evenly from one side to the
+// other, so every frame has a stop of its own, the ends included.
+let stops = [];
+let here = 0; // the frame the strip is at; fractional between two
+
+function measure() {
   const pad = parseFloat(getComputedStyle(strip).paddingLeft);
-  const starts = [...strip.children].map((f) => f.offsetLeft - pad);
-  const at = scroller.target;
-  const next = dir > 0 ? starts.find((x) => x > at + 2) : starts.findLast((x) => x < at - 2);
-  scroller.to(next ?? (dir > 0 ? Infinity : 0));
+  const room = strip.clientWidth - pad * 2;
+  const start = strip.getBoundingClientRect().left - strip.scrollLeft;
+  const frames = [...strip.querySelectorAll(".frame")];
+  stops = frames.map((f, i) => {
+    const box = f.getBoundingClientRect();
+    const along = frames.length > 1 ? i / (frames.length - 1) : 0;
+    return Math.max(0, box.left - start - pad - along * (room - box.width));
+  });
+}
+
+function frameAt(x) {
+  let lo = 0, hi = stops.length - 1;
+  while (hi - lo > 1) {
+    const mid = (lo + hi) >> 1;
+    if (stops[mid] <= x) lo = mid; else hi = mid;
+  }
+  if (hi <= 0) return 0;
+  const between = (x - stops[lo]) / (stops[hi] - stops[lo] || 1);
+  return lo + Math.max(0, Math.min(1, between));
+}
+
+function stopAt(frame) {
+  const lo = Math.max(0, Math.min(stops.length - 1, Math.floor(frame)));
+  const next = stops[lo + 1] ?? stops[lo];
+  return stops[lo] + (next - stops[lo]) * (frame - lo);
+}
+
+// One frame (or ten) on from wherever the strip is heading.
+function stepFrame(by) {
+  const goal = Math.max(0, Math.min(stops.length - 1, Math.round(frameAt(scroller.target)) + by));
+  scroller.to(stops[goal]);
 }
 
 document.addEventListener("keydown", (e) => {
-  if (viewer?.open) return; // the viewer handles its own keys
+  if (viewer?.open || e.defaultPrevented) return; // the viewer and the dial handle their own keys
   if (e.target.closest?.("a, button") && e.key === " ") return;
   if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === "PageDown") { e.preventDefault(); stepFrame(1); }
   if (e.key === "ArrowLeft" || e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); stepFrame(-1); }
   if (e.key === "Home") scroller.to(0);
   if (e.key === "End") scroller.to(Infinity);
+});
+
+/* ---------- Moving fast ---------- */
+
+// Flying past (a spun dial, End) shows each photo's colors and loads nothing
+// until it slows down, or one spin would download the whole strip.
+const FAST = 9; // px per ms: roughly a dozen photos a second
+let lastX = 0, lastT = 0, slowed = 0;
+
+strip.addEventListener("scroll", () => {
+  const x = strip.scrollLeft, t = performance.now();
+  if (t - lastT < 200 && Math.abs(x - lastX) / Math.max(1, t - lastT) > FAST) {
+    strip.classList.add("flying");
+    clearTimeout(slowed);
+    slowed = setTimeout(() => strip.classList.remove("flying"), 120);
+  }
+  lastX = x; lastT = t;
+  here = frameAt(x);
+  dial?.sync(here);
+}, { passive: true });
+
+/* ---------- Dial ---------- */
+
+// Wheel and touch on the strip itself take over from a dial that's still turning.
+strip.addEventListener("wheel", () => dial?.stop(), { passive: true });
+strip.addEventListener("pointerdown", () => dial?.stop());
+
+function addDial(photos) {
+  // A tick as pale as the page would vanish, so each color is mixed with a
+  // little of the page's ink (#2b2a27).
+  const INK = [43, 42, 39];
+  const onCream = (hex) => `rgb(${INK.map((v, k) => Math.round(parseInt(hex.slice(1 + k * 2, 3 + k * 2), 16) * 0.82 + v * 0.18))})`;
+  const colors = photos.map((p) => (p.colors ?? ["#8a8378", "#8a8378"]).map(onCream));
+  dial = createDial(dialRoot, {
+    count: photos.length,
+    colorsOf: (i) => colors[i],
+    labelOf: (i) => gear(photos[i]),
+    onTurn: (frame) => scroller.jump(stopAt(frame)),
+    onStep: (by) => stepFrame(by),
+  });
+  dialRoot.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    scroller.to(scroller.target + (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY));
+  }, { passive: false });
+}
+
+// Turning a phone keeps the frame you were on.
+addEventListener("resize", () => {
+  if (!stops.length) return;
+  const frame = here;
+  measure();
+  scroller.jump(stopAt(frame));
+  dial?.sync(frame);
 });
 
 /* ---------- Start ---------- */
@@ -93,6 +182,8 @@ try {
   // A fresh mix of film stocks on every visit.
   const photos = mixRolls(await loadPhotos());
   draw(photos);
+  measure();
+  addDial(photos);
   strip.focus({ preventScroll: true });
   // On closing the viewer, bring the strip to the photo you were last looking at.
   viewer = createViewer(photos, {
@@ -102,8 +193,7 @@ try {
       return img?.currentSrc;
     },
     onClose(i) {
-      const f = strip.children[i];
-      if (f) scroller.to(f.offsetLeft - (strip.clientWidth - f.offsetWidth) / 2);
+      if (stops[i] !== undefined) scroller.to(stops[i]);
     },
   });
 } catch (err) {

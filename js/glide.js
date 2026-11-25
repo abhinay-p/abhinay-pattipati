@@ -2,16 +2,15 @@
 // wheel input moves the page sideways; with axis "y" (the gallery), the wheel
 // scrolls down the page as usual, just smoothly. Sideways trackpad swipes and
 // touch drags are left to the browser, which already scrolls those smoothly.
-// Returns { to(pos), target } for keyboard steps.
+// Returns { to(pos), jump(pos), target }: to() glides there, for keyboard steps;
+// jump() goes straight there, for a hand that is already moving it.
 //
 // The page rides a spring (motion.js) towards a target that the wheel and keys
 // move. Each wheel turn retargets the spring mid-flight, so the page keeps its
 // speed and coasts a little after the wheel stops, and a reversed key press
 // turns it round instead of snapping back. The ends stay hard stops: faking a
 // bounce on page scroll would fight the browser's own.
-import { createSpring } from "./motion.js";
-
-const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+import { createSpring, reduceMotion } from "./motion.js";
 
 // A 0.5s response trails a steady wheel by the same ~160ms the earlier eased
 // glide did, so ordinary scrolling feels the same; starting, stopping and
@@ -30,9 +29,14 @@ export function glide(scroller, { axis = "x", response = 0.5 } = {}) {
   // just short of target.
   const spring = createSpring(target, set, { response });
 
+  function jump(v) {
+    target = clamp(v);
+    spring.set(target);
+  }
+
   function to(v) {
     target = clamp(v);
-    if (reduceMotion.matches) { spring.set(target); return; }
+    if (reduceMotion.matches) return jump(target);
     // From rest, start from wherever the page is now; it may have been scrolled natively.
     if (!spring.moving) spring.set(get());
     spring.to(target);
@@ -59,5 +63,5 @@ export function glide(scroller, { axis = "x", response = 0.5 } = {}) {
     if (spring.moving) spring.to(target);
   });
 
-  return { to, get target() { return target; } };
+  return { to, jump, get target() { return target; } };
 }

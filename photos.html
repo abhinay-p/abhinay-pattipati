@@ -18,6 +18,7 @@
   <link rel="modulepreload" href="js/image.js">
   <link rel="modulepreload" href="js/glide.js">
   <link rel="modulepreload" href="js/motion.js">
+  <link rel="modulepreload" href="js/dial.js">
   <link rel="modulepreload" href="js/viewer.js">
   <link rel="modulepreload" href="js/order.js">
   <!-- Karla arrives without holding up the page; the system font stands in. -->
@@ -32,6 +33,9 @@
   </header>
 
   <main class="strip" id="strip" tabindex="0" aria-label="Photographs. Scroll or use the arrow keys to move through them."></main>
+
+  <!-- A camera-style dial that turns through every frame (js/dial.js). -->
+  <div class="dial" id="dial" role="slider" tabindex="0" aria-label="Film dial" aria-orientation="horizontal"></div>
 
   <dialog class="viewer" id="viewer" aria-label="Photo viewer">
     <button class="v-btn v-close" id="v-close">Close</button>

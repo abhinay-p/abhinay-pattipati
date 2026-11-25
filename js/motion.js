@@ -53,3 +53,38 @@ export function createSpring(initial, onUpdate, { response = 0.35, dampingRatio 
     get moving() { return frame !== 0; },
   };
 }
+
+export const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+
+// Pulled past its end, a thing follows less and less, like a rubber band: the
+// offset for a pull past the limit, on something `size` long. (iOS's own curve.)
+export function rubberBand(pull, size) {
+  if (size <= 0) return 0;
+  const offset = (1 - 1 / ((0.55 * Math.abs(pull)) / size + 1)) * size;
+  return pull < 0 ? -offset : offset;
+}
+
+// `value` as it is between min and max, rubber-banded beyond them.
+export function rubberBanded(value, min, max, size) {
+  if (value > max) return max + rubberBand(value - max, size);
+  if (value < min) return min + rubberBand(value - min, size);
+  return value;
+}
+
+// How fast a finger is moving when it lets go, in units per second, from its
+// last tenth of a second.
+export function createTracker(value, time) {
+  let samples = [{ value, time }];
+  return {
+    add(value, time) {
+      samples.push({ value, time });
+      samples = samples.filter((s) => time - s.time <= 100);
+    },
+    velocity(now) {
+      const recent = samples.filter((s) => now - s.time <= 100);
+      if (recent.length < 2) return 0;
+      const a = recent[0], b = recent[recent.length - 1];
+      return b.time > a.time ? ((b.value - a.value) / (b.time - a.time)) * 1000 : 0;
+    },
+  };
+}

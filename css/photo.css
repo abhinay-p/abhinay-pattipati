@@ -11,8 +11,9 @@
 
   --bar: 72px;
   --pad: clamp(16px, 3vw, 48px);
-  /* Height the photos can use: the viewport minus the bar and padding. */
-  --stage: calc(100dvh - var(--bar) - var(--pad) * 2);
+  --dial: 76px;           /* room under the strip for the dial */
+  /* Height the photos can use: the viewport minus the bar, padding and dial. */
+  --stage: calc(100dvh - var(--bar) - var(--pad) - max(var(--pad), var(--dial)));
   --ease-out: cubic-bezier(.215, .61, .355, 1);
   color-scheme: light;
 }
@@ -39,11 +40,14 @@ a { color: inherit; text-decoration: none; }
 
 /* ---------------- Sideways strip ---------------- */
 .strip {
-  position: fixed; inset: var(--bar) 0 0; padding: var(--pad);
+  position: fixed; inset: var(--bar) 0 0; padding: var(--pad) var(--pad) 0;
   display: flex; align-items: flex-start;
   overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain;
-  scrollbar-width: thin; scrollbar-color: var(--line) transparent;
+  scrollbar-width: none; /* the dial shows where you are, and moves you */
 }
+.strip::-webkit-scrollbar { display: none; }
+/* Flying past: photos that haven't loaded stay out of it, so they don't start. */
+.strip.flying .frame img:not(.loaded) { display: none; }
 .strip:focus-visible { outline: none; }
 /* Flex rows drop their right padding when they overflow; this keeps the end margin. */
 .strip::after { content: ""; flex: none; width: var(--pad); }
@@ -80,6 +84,26 @@ a { color: inherit; text-decoration: none; }
 .frame figcaption span + span { opacity: .8; }
 .frame:hover figcaption, .frame:focus-within figcaption { transform: none; }
 @media (hover: none) { .frame figcaption { display: none; } } /* touch: labels live in the viewer */
+
+/* ---------------- Film dial ---------------- */
+.dial {
+  position: fixed; left: 50%; bottom: max(8px, env(safe-area-inset-bottom)); z-index: 1;
+  width: min(720px, 100vw); height: 60px; transform: translateX(-50%);
+  cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.dial.turning { cursor: grabbing; }
+.dial:focus-visible { outline: 1px solid var(--ink); outline-offset: 2px; border-radius: 6px; }
+.dial-readout {
+  height: 20px; text-align: center; font-size: 12px; line-height: 16px; color: var(--ink-2);
+  font-variant-numeric: tabular-nums; transition: color .2s; pointer-events: none;
+}
+.dial-frame { color: var(--ink); }
+.dial:hover .dial-readout, .dial.turning .dial-readout { color: var(--ink); }
+.dial-ring { display: block; width: 100%; height: 40px; }
+.dial-needle {
+  position: absolute; left: 50%; top: 18px; width: 1px; height: 28px; margin-left: -.5px;
+  background: var(--ink); pointer-events: none;
+}
 
 /* ---------------- Gallery: contact sheet ----------------
    Every photo printed on one contact sheet: rows of dark film strips with

@@ -3,7 +3,7 @@
 A film photography portfolio, live at https://abhinay-p.github.io/abhinay-pattipati/.
 
 - **Landing** (`index.html`, `js/landing.js`): no text. One of the landscape photographs (a different one each visit, from the `POOL` list in `js/landing.js`) is drawn with WebGL as a pixel mosaic with film-grain dithering. Moving the mouse (or dragging on a phone) sends ripples through it. Clicking anywhere opens the photographs. Without WebGL it falls back to the blurred photo, and with reduced motion turned on, the pattern stays still. Old photo links (`/#portra400_12`) are forwarded to `photos.html`.
-- **Photographs** (`photos.html`): a sideways-scrolling strip of photos, with film stocks freshly mixed on every visit.
+- **Photographs** (`photos.html`): a sideways-scrolling strip of photos, with film stocks freshly mixed on every visit. A camera-style dial under it (`js/dial.js`) turns through every frame: drag, swipe, flick or tap it, or focus it and use the arrow keys.
 - **Gallery** (`gallery.html`): every photo on one contact sheet, cut into strips that sit slightly askew as if laid by hand (the order and placement change on every visit). Hovering a frame shows a bigger preview, and clicking opens the photo on its own. A small toolbar at the bottom grows on hover (or tap). It lets visitors order the sheet by stock or show only one film stock; nothing is grouped unless they choose it.
 
 Photos are labelled by film stock. It has no framework and no build step, so it runs on any static host.
