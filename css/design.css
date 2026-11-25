@@ -40,6 +40,35 @@
 .column address p { margin: 0 0 6px; }
 #copied { font-size: 13px; color: var(--ink-2); }
 
+/* Layout demo: a short piece of the strip, placed by the same rules (layout.js) */
+.mini {
+  --tall: 220px; --margin: 14px; position: relative; display: flex; align-items: flex-start; height: 276px;
+  padding: 20px 0; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none;
+}
+.mini::-webkit-scrollbar { display: none; }
+.mini:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
+.mini-frame {
+  position: relative; flex: none; height: calc(var(--size) * var(--tall)); aspect-ratio: var(--ar);
+  margin: calc(var(--offset) * var(--tall)) 0 0 calc(var(--gap) * var(--margin));
+  background: linear-gradient(var(--tone-a, var(--placeholder)), var(--tone-b, var(--placeholder)));
+}
+.mini-frame:first-child { margin-left: 0; }
+.mini-frame img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.mini.showing {
+  --dash: repeating-linear-gradient(90deg, rgba(43, 42, 39, .45) 0 4px, transparent 4px 8px);
+  background: var(--dash) 0 20px / 100% 1px no-repeat local, var(--dash) 0 240px / 100% 1px no-repeat local;
+}
+.mini.showing .mini-frame { box-shadow: 0 0 0 1px rgba(43, 42, 39, .55); }
+.mini.showing .mini-frame::before, .mini.showing .mini-frame:not(:first-child)::after {
+  position: absolute; white-space: nowrap; font: 10px/1.4 ui-monospace, "SF Mono", Menlo, monospace; color: var(--ink);
+}
+.mini.showing .mini-frame::before { content: attr(data-spec); left: 0; top: 100%; padding-top: 3px; }
+.mini.showing .mini-frame:not(:first-child)::after {
+  content: attr(data-gap); right: 100%; top: 50%; width: calc(var(--gap) * var(--margin));
+  display: flex; justify-content: center; border-top: 1px solid rgba(43, 42, 39, .55);
+}
+.legend { margin: 14px 0 0; }
+
 /* Loading demo */
 .arrivals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .arrivals figure { margin: 0; }

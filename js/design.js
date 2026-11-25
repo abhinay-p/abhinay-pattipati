@@ -4,6 +4,7 @@ import { glide } from "./glide.js";
 import { createSpring, reduceMotion } from "./motion.js";
 import { createDial } from "./dial.js";
 import { mixRolls, shuffle } from "./order.js";
+import { placeFrame } from "./layout.js";
 import { copyFor, tickColors, tone, SHARP } from "./image.js";
 
 const $ = (id) => document.getElementById(id);
@@ -11,6 +12,32 @@ glide($("design"), { axis: "y" });
 // So the arrow keys, Page Down and the space bar scroll it from the start. A
 // link to one section keeps its own place.
 if (!location.hash) $("design").focus({ preventScroll: true });
+
+/* ---------- A strip instead of a grid: D shows the design ---------- */
+
+function layoutDemo(photos) {
+  const mini = $("mini"), toggle = $("layout-toggle");
+  mini.replaceChildren(...photos.slice(0, 10).map((p, i) => {
+    const { size, offset, gap } = placeFrame(p, i, photos.length);
+    const down = size < 1 ? offset / (1 - size) : 0; // 0 is pinned to the top, 1 to the bottom
+    const frame = el("div", { class: "mini-frame", "data-spec": `${Math.round(size * 100)}% · ${+down.toFixed(2)}`, "data-gap": `×${gap}` },
+      el("img", { alt: "", loading: "lazy", decoding: "async", src: p.thumb || p.src }));
+    frame.style.cssText = `--size:${size};--offset:${offset};--gap:${gap};--ar:${p.width / p.height || 1.5};${tone(p)}`;
+    return frame;
+  }));
+  const show = (on) => {
+    mini.classList.toggle("showing", on);
+    $("legend").hidden = !on;
+    toggle.setAttribute("aria-pressed", String(on));
+    toggle.textContent = on ? "Hide the design (D)" : "Show the design (D)";
+  };
+  toggle.onclick = () => show(!mini.classList.contains("showing"));
+  document.addEventListener("keydown", (e) => {
+    if (e.key.toLowerCase() !== "d" || e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+    show(!mini.classList.contains("showing"));
+    $("layout-demo").scrollIntoView({ block: "nearest" });
+  });
+}
 
 /* ---------- Photos arrive as their own colors ---------- */
 
@@ -120,10 +147,11 @@ motionDemo();
 try {
   const photos = await loadPhotos();
   const mixed = mixRolls(photos);
+  layoutDemo(mixed);
   loadingDemo(photos);
   dialDemo(mixed);
   shuffleDemo(photos);
 } catch {
   // Without the photos the writing still stands; take away the demos that need them.
-  for (const id of ["loading-demo", "dial-demo", "shuffle-demo"]) $(id).remove();
+  for (const id of ["layout-demo", "loading-demo", "dial-demo", "shuffle-demo"]) $(id).remove();
 }
