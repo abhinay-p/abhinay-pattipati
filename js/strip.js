@@ -108,10 +108,17 @@ function stopAt(frame) {
   return stops[lo] + (next - stops[lo]) * (frame - lo);
 }
 
+// Go to a scroll position, noting at once where that leaves the strip: a resize
+// can arrive before the browser's own scroll event does.
+function moveTo(x) {
+  scroller.to(x);
+  here = frameAt(strip.scrollLeft);
+}
+
 // One frame (or ten) on from wherever the strip is heading.
 function stepFrame(by) {
   const goal = Math.max(0, Math.min(stops.length - 1, Math.round(frameAt(scroller.target)) + by));
-  scroller.to(stops[goal]);
+  moveTo(stops[goal]);
 }
 
 document.addEventListener("keydown", (e) => {
@@ -119,8 +126,8 @@ document.addEventListener("keydown", (e) => {
   if (e.target.closest?.("a, button") && e.key === " ") return;
   if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === "PageDown") { e.preventDefault(); stepFrame(1); }
   if (e.key === "ArrowLeft" || e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); stepFrame(-1); }
-  if (e.key === "Home") scroller.to(0);
-  if (e.key === "End") scroller.to(Infinity);
+  if (e.key === "Home") moveTo(0);
+  if (e.key === "End") moveTo(Infinity);
 });
 
 /* ---------- Moving fast ---------- */
@@ -158,7 +165,10 @@ function addDial(photos) {
     count: photos.length,
     colorsOf: (i) => colors[i],
     labelOf: (i) => gear(photos[i]),
-    onTurn: (frame) => scroller.jump(stopAt(frame)),
+    onTurn: (frame) => {
+      scroller.jump(stopAt(frame));
+      here = frame;
+    },
     onStep: (by) => stepFrame(by),
   });
   dialRoot.addEventListener("wheel", (e) => {
@@ -193,7 +203,7 @@ try {
       return img?.currentSrc;
     },
     onClose(i) {
-      if (stops[i] !== undefined) scroller.to(stops[i]);
+      if (stops[i] !== undefined) moveTo(stops[i]);
     },
   });
 } catch (err) {
