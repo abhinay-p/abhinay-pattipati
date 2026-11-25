@@ -230,6 +230,8 @@ try {
   draw();
   if (fromHash("pick")) setPicking(true);
   buildFilter();
+  // So the arrow keys, Page Down and the space bar scroll it from the start.
+  if (document.activeElement === document.body) gallery.focus({ preventScroll: true });
   // After closing the viewer, return focus to the frame you were last on.
   viewer = createViewer(photos, {
     onClose(i) {

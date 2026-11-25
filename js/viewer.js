@@ -72,7 +72,7 @@ export function createViewer(photos, { onClose, preview } = {}) {
   viewer.addEventListener("close", () => onClose?.(current));
 
   document.addEventListener("keydown", (e) => {
-    if (!viewer.open) return;
+    if (!viewer.open || e.ctrlKey || e.metaKey || e.altKey) return; // with those, it's the browser's, such as Back
     if (e.key === "ArrowLeft") show(current - 1);
     if (e.key === "ArrowRight") show(current + 1);
   });

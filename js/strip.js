@@ -101,6 +101,7 @@ function stepFrame(by) {
 
 document.addEventListener("keydown", (e) => {
   if (viewer?.open || e.defaultPrevented) return; // the viewer and the dial handle their own keys
+  if (e.ctrlKey || e.metaKey || e.altKey) return; // the browser's own, such as Back
   if (e.target.closest?.("a, button") && e.key === " ") return;
   if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === "PageDown") { e.preventDefault(); stepFrame(1); }
   if (e.key === "ArrowLeft" || e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); stepFrame(-1); }
