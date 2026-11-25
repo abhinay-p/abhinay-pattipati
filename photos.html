@@ -32,10 +32,11 @@
     <nav aria-label="Main"><a href="photos.html" aria-current="page">Photographs</a><a href="gallery.html">Gallery</a></nav>
   </header>
 
-  <main class="strip" id="strip" tabindex="0" aria-label="Photographs. Scroll or use the arrow keys to move through them."></main>
-
-  <!-- A camera-style dial that turns through every frame (js/dial.js). -->
+  <!-- A camera-style dial that turns through every frame (js/dial.js). It comes
+       before the photos so the Tab key reaches it without passing all of them. -->
   <div class="dial" id="dial" role="slider" tabindex="0" aria-label="Film dial" aria-orientation="horizontal"></div>
+
+  <main class="strip" id="strip" tabindex="0" aria-label="Photographs. Scroll or use the arrow keys to move through them."></main>
 
   <dialog class="viewer" id="viewer" aria-label="Photo viewer">
     <button class="v-btn v-close" id="v-close">Close</button>
