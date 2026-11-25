@@ -79,7 +79,7 @@
         <h2 id="dial-h">A dial for the whole strip</h2>
         <dl>
           <dt>Problem</dt>
-          <dd>At 1440 by 900 the strip was about 192 screens long, and nothing showed where you were. A scrollbar's handle would have been about 7 pixels wide.</dd>
+          <dd>At 1440 by 900 the strip was about 192 screens long, and all that showed where you were was a pale scrollbar handle about 17 pixels wide.</dd>
           <dt>Decision</dt>
           <dd>A dial like the one on a camera: one tick for each photo, in that photo's own colors, turning under a fixed needle. Drag, swipe, flick or tap it, or use the arrow keys. The frame number and film stock say where you are.</dd>
           <dt>Trade-off</dt>
@@ -105,8 +105,8 @@
         </dl>
         <div class="demo" id="shuffle-demo">
           <p class="demo-note">The start of each, labeled by film. Repeats are filled in.</p>
-          <div class="deal"><h3>Plain shuffle</h3><div class="cards" id="deal-plain"></div><p id="count-plain"></p></div>
-          <div class="deal"><h3>This site</h3><div class="cards" id="deal-site"></div><p id="count-site"></p></div>
+          <div class="deal"><h3>Plain shuffle</h3><div class="cards" id="deal-plain" aria-hidden="true"></div><p id="count-plain"></p></div>
+          <div class="deal"><h3>This site</h3><div class="cards" id="deal-site" aria-hidden="true"></div><p id="count-site"></p></div>
           <button type="button" class="demo-btn" id="shuffle-again">Shuffle again</button>
         </div>
       </section>

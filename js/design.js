@@ -8,6 +8,9 @@ import { copyFor, tickColors, tone, SHARP } from "./image.js";
 
 const $ = (id) => document.getElementById(id);
 glide($("design"), { axis: "y" });
+// So the arrow keys, Page Down and the space bar scroll it from the start. A
+// link to one section keeps its own place.
+if (!location.hash) $("design").focus({ preventScroll: true });
 
 /* ---------- Photos arrive as their own colors ---------- */
 
