@@ -4,3 +4,6 @@ node_modules/
 import-plan.json
 import-review.jpg
 __pycache__/
+.env
+.env.*
+.venv/
