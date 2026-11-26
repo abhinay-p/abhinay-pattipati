@@ -4,6 +4,7 @@ import { createViewer, altText } from "./viewer.js";
 import { mixRolls, byStock } from "./order.js";
 import { copyFor, SHARP, tone, whenLoaded } from "./image.js";
 import { fromHash, nameOf, write, FULL } from "./placing.js";
+import { ambient } from "./ambient.js";
 
 const gallery = document.getElementById("gallery");
 const loupe = document.getElementById("loupe");
@@ -163,6 +164,22 @@ gallery.addEventListener("pointermove", (e) => {
 gallery.addEventListener("pointerleave", hideLoupe);
 gallery.addEventListener("scroll", hideLoupe, { passive: true }); // reappears on the next move
 
+/* ---------- The page takes on the colors of the frame you're looking at ---------- */
+
+// The one under the pointer, the one with focus, or, while scrolling, the one
+// in the middle of the screen.
+const tintFrom = (neg) => { if (neg) ambient(photos[+neg.dataset.i]); };
+let tintQueued = false;
+function tintFromMiddle() {
+  tintQueued = false;
+  tintFrom(document.elementFromPoint(innerWidth / 2, innerHeight / 2)?.closest(".neg"));
+}
+gallery.addEventListener("scroll", () => {
+  if (!tintQueued) { tintQueued = true; requestAnimationFrame(tintFromMiddle); }
+}, { passive: true });
+gallery.addEventListener("pointerover", (e) => { if (e.pointerType === "mouse") tintFrom(e.target.closest(".neg")); });
+gallery.addEventListener("focusin", (e) => tintFrom(e.target.closest(".neg")));
+
 // Keyboard users get the same preview next to the focused frame.
 gallery.addEventListener("focusin", (e) => {
   const neg = e.target.closest(".neg");
@@ -189,6 +206,7 @@ function apply(next) {
   hideLoupe();
   draw();
   gallery.scrollTop = 0;
+  requestAnimationFrame(tintFromMiddle);
   current.textContent = view.stock ? `${view.stock} · ${list.length}` : `All · ${view.order === "stock" ? "by stock" : "mixed"}`;
   for (const b of inner.querySelectorAll("button")) b.setAttribute("aria-pressed", String(b.dataset.key === keyOf(view)));
 }
@@ -235,6 +253,7 @@ try {
   // it would hold back the thumbnails' requests by up to a tenth of a second.
   requestAnimationFrame(() => {
     if (document.activeElement === document.body) gallery.focus({ preventScroll: true });
+    tintFromMiddle();
   });
   // After closing the viewer, return focus to the frame you were last on.
   viewer = createViewer(photos, {

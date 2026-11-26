@@ -10,6 +10,10 @@ A film photography portfolio, live at https://abhinay-p.github.io/abhinay-pattip
 
 Photos are labelled by film stock. It has no framework and no build step, so it runs on any static host.
 
+## Background
+
+Every page with the top bar has fine grain over cream, washed with the two main colors of the photo you're looking at: the one the strip is at, the Gallery frame under the pointer or in the middle of the screen, the photo on top of the light table, or the Design page's dial demo. `js/ambient.js` lifts those colors into light tints, so the gray text keeps at least 4.5:1 contrast whatever the photo, and the page fades between them. With reduced motion turned on, it changes without fading.
+
 ## How photos load
 
 Every photo's place on the page starts as its own two colors (the average of its top and bottom halves), and the photo fades in over them. The browser picks from three sizes: WebP copies 960px and 1600px on the long edge, and the 2000px original. Off-screen photos wait until they're close. `js/image.js` makes those choices, and `el()` in `js/common.js` sets `src` last, because a photo that gets its `src` before `loading="lazy"` can start downloading at once.

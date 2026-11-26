@@ -6,6 +6,7 @@ import { createDial } from "./dial.js";
 import { mixRolls, shuffle } from "./order.js";
 import { placeFrame } from "./layout.js";
 import { copyFor, tickColors, tone, SHARP } from "./image.js";
+import { ambient } from "./ambient.js";
 
 const $ = (id) => document.getElementById(id);
 glide($("design"), { axis: "y" });
@@ -76,6 +77,7 @@ function dialDemo(photos) {
   const show = (frame) => {
     at = frame;
     const p = photos[Math.round(frame)];
+    ambient(p); // the page takes on the colors of the photo the dial is at
     // Its colors at once; the photo itself when the dial pauses on it.
     img.style.cssText = `${tone(p)}aspect-ratio:${p.width / p.height};${p.width > p.height ? "width:390px" : "height:260px"}`;
     if (img.dataset.src !== p.thumb) img.removeAttribute("src");

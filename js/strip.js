@@ -5,6 +5,7 @@ import { mixRolls } from "./order.js";
 import { placeFrame } from "./layout.js";
 import { photoImg, sizesFor, tickColors, tone, whenLoaded } from "./image.js";
 import { createDial } from "./dial.js";
+import { ambient } from "./ambient.js";
 
 const strip = document.getElementById("strip");
 const dialRoot = document.getElementById("dial");
@@ -54,6 +55,10 @@ addEventListener("resize", () => {
 // other, so every frame has a stop of its own, the ends included.
 let stops = [];
 let here = 0; // the frame the strip is at; fractional between two
+let shown = []; // the photos in strip order
+
+// The page takes on the colors of the photo the strip is at.
+const tint = () => ambient(shown[Math.round(here)]);
 
 function measure() {
   const pad = parseFloat(getComputedStyle(strip).paddingLeft);
@@ -121,11 +126,13 @@ strip.addEventListener("scroll", () => {
   if (t - lastT < 200 && Math.abs(x - lastX) / Math.max(1, t - lastT) > FAST) {
     strip.classList.add("flying");
     clearTimeout(slowed);
-    slowed = setTimeout(() => strip.classList.remove("flying"), 120);
+    slowed = setTimeout(() => { strip.classList.remove("flying"); tint(); }, 120);
   }
   lastX = x; lastT = t;
   here = frameAt(x);
   dial?.sync(here);
+  // Flying past, the colors wait until the strip slows down.
+  if (!strip.classList.contains("flying")) tint();
 }, { passive: true });
 
 /* ---------- Dial ---------- */
@@ -170,6 +177,8 @@ try {
   draw(photos);
   measure();
   addDial(photos);
+  shown = photos;
+  tint();
   strip.focus({ preventScroll: true });
   // On closing the viewer, bring the strip to the photo you were last looking at.
   viewer = createViewer(photos, {

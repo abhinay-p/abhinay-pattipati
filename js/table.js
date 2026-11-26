@@ -7,6 +7,7 @@ import { createViewer, altText } from "./viewer.js";
 import { shuffle } from "./order.js";
 import { copyFor, SHARP, tone } from "./image.js";
 import { fromHash, nameOf, write, FULL } from "./placing.js";
+import { ambient } from "./ambient.js";
 
 const table = document.getElementById("table");
 const said = document.getElementById("said");
@@ -76,10 +77,14 @@ function go(t, to, speed = {}) {
 // Where it's heading, which is where the link should say it is.
 const heading = (t, key) => (t.springs[key].moving ? t.springs[key].target : t[key]);
 
+// The page takes on the colors of the photo on top of the pile.
+const tint = () => ambient(prints.reduce((a, b) => (b.z > a.z ? b : a), prints[0])?.photo);
+
 function lift(t) {
   if (t.z === top) return;
   t.z = ++top;
   t.node.style.zIndex = t.z;
+  tint();
   save();
 }
 
@@ -89,6 +94,7 @@ function remove(t) {
   prints.splice(i, 1);
   shown.splice(i, 1);
   t.node.remove();
+  tint();
   (prints[i] ?? prints[i - 1])?.node.focus();
   if (!prints.length) document.getElementById("deal").focus();
   say(`${t.label} taken off the table`);
@@ -172,6 +178,7 @@ function key(e, t) {
     t.z = Math.min(...prints.map((p) => p.z)) - 1;
     t.node.style.zIndex = t.z;
     say("Under the pile");
+    tint();
     save();
   } else if (e.key === "Delete" || e.key === "Backspace") {
     remove(t);
@@ -211,6 +218,7 @@ function lay(wanted) {
     paint(t);
     if (o.x === undefined) go(t, place);
   }
+  tint();
   save();
 }
 

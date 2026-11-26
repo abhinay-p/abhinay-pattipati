@@ -2,7 +2,8 @@
 .table-page { --tools: 64px; }
 .table {
   position: fixed; inset: var(--bar) 0 var(--tools); overflow: hidden; touch-action: none;
-  background: radial-gradient(ellipse at center, #fffdf8, var(--bg) 78%);
+  /* Lit from below in the middle; the page's grain and colors show at the edges. */
+  background: radial-gradient(ellipse at center, rgba(255, 253, 248, .9), rgba(255, 253, 248, 0) 78%);
 }
 .print {
   all: unset; position: absolute; left: 0; top: 0; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;

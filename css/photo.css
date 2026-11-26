@@ -1,13 +1,17 @@
 /* ------------------------------------------------------------------
-   Photo strip. Warm monochrome: a soft cream page so the photos are
-   the only color, Karla in warm grays (after hazeleckert.ca).
+   Photo strip. A cream page with fine grain, washed with the colors of
+   the photo you're looking at (js/ambient.js); Karla in warm grays.
 ------------------------------------------------------------------- */
+@property --wash-a { syntax: "<color>"; inherits: false; initial-value: #f6f2ea; }
+@property --wash-b { syntax: "<color>"; inherits: false; initial-value: #f6f2ea; }
 :root {
   --bg: #f6f2ea;         /* soft cream behind the photos */
   --placeholder: #ebe5d9; /* shown while a photo loads */
   --ink: #2b2a27;
-  --ink-2: #6f6a61;       /* 5:1 on --bg, fine for small text */
+  --ink-2: #5d5850;       /* 4.5:1 or more on the lightest cream and on every wash */
   --line: #d9d2c4;
+  /* Fine, warm grain, like the tooth of photo paper. */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .17 0 0 0 0 .16 0 0 0 0 .14 0 0 0 .5 -.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 
   --bar: 72px;
   --pad: clamp(16px, 3vw, 48px);
@@ -21,7 +25,13 @@
 *, *::before, *::after { box-sizing: border-box; }
 html, body { height: 100%; }
 body {
-  margin: 0; overflow: hidden; background: var(--bg); color: var(--ink);
+  margin: 0; overflow: hidden; color: var(--ink);
+  /* Until a page names a photo, both washes are the cream itself. */
+  background:
+    radial-gradient(ellipse 60% 85% at 28% 45%, var(--wash-a), transparent 75%),
+    radial-gradient(ellipse 60% 85% at 74% 58%, var(--wash-b), transparent 75%),
+    var(--grain), var(--bg);
+  transition: --wash-a .9s ease, --wash-b .9s ease;
   font: 14px/1.5 "Karla", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%;
 }
