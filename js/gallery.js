@@ -231,7 +231,11 @@ try {
   if (fromHash("pick")) setPicking(true);
   buildFilter();
   // So the arrow keys, Page Down and the space bar scroll it from the start.
-  if (document.activeElement === document.body) gallery.focus({ preventScroll: true });
+  // Not until the first frame: focusing lays out the whole sheet, and done now
+  // it would hold back the thumbnails' requests by up to a tenth of a second.
+  requestAnimationFrame(() => {
+    if (document.activeElement === document.body) gallery.focus({ preventScroll: true });
+  });
   // After closing the viewer, return focus to the frame you were last on.
   viewer = createViewer(photos, {
     onClose(i) {
